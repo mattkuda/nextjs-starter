@@ -1,0 +1,157 @@
+App Flow
+This app flow document details the user journey through FlowThread, outlining interactions, transitions, and key decisions to guide both development and design.
+
+1. Entry Points
+Landing Page (For Unsigned Users)
+Primary Purpose: Introduce the product, showcase features, and allow a one-time demo.
+User Actions:
+Explore features (scroll down for highlights).
+Try the demo (limited functionality).
+Click "Sign Up for Free" or "Login" to proceed.
+Outcomes:
+Try Demo → Transition to demo functionality.
+Sign Up → Navigate to the Sign-Up Page.
+Login → Navigate to Login Page.
+
+2. Demo Flow
+Demo Access
+Entry:
+User clicks "Try Demo" on the Landing Page.
+Input Prompt:
+Form: Paste thread or context, select tone (limited to "Medium"), and click "Generate Reply."
+Output Display:
+Generated reply is displayed below the form.
+Message: "Like what you see? Sign up for Free to unlock more!"
+Limits:
+1 request allowed.
+Post-demo message displayed:
+"You’ve used your demo! Sign up to continue using FlowThread."
+CTA: Button redirects to Sign-Up Page.
+
+3. Sign-Up Flow
+Sign-Up Page
+Entry:
+User navigates from the Landing Page or after demo completion.
+Options:
+Sign Up with:
+Slack OAuth (preferred for seamless onboarding).
+Email (basic form: Email, Password, Confirm Password).
+Post-Sign-Up Actions:
+Redirect to Dashboard with Free Plan features enabled.
+Display onboarding message:
+"Welcome to FlowThread! Start generating replies, summaries, and tasks now!"
+
+4. Main Dashboard Flow (Post-Sign-Up)
+Default Tabs
+Tab 1: Reply Generator:
+User Flow:
+Paste thread or message context.
+Customize:
+Tone (default for Free: Formal, Casual, Humorous).
+Variations (Free: 1 or 3).
+Length (Short, Medium, Long).
+Emoji toggle.
+Click "Generate Reply."
+View results:
+Replies displayed in collapsible cards.
+Copy to Clipboard button available for each reply.
+Pro-Only Message:
+"Unlock advanced tones and longer threads by upgrading to Pro."
+Tab 2: Thread Summarizer:
+User Flow:
+Paste thread context.
+Toggle options:
+Include Key Points.
+Include Outstanding Questions.
+Include Action Items (Pro only).
+Click "Generate Summary."
+View summary:
+Display as bullet points under respective categories.
+Copy to Clipboard button available.
+Tab 3: Task Extractor:
+User Flow:
+Paste thread context.
+Click "Extract Tasks."
+View actionable items:
+List format (e.g., "Task: Implement feature X, Assigned to: [Name]").
+Pro-Only: Option to export as CSV/Markdown.
+Usage Tracker
+Sidebar display:
+Free Plan:
+"You’ve used 5/30 threads. Upgrade to Pro for 200 threads/month."
+Pro Plan:
+"You’ve used 50/200 threads. Renew on [Date]."
+
+5. Upgrade Flow
+Upgrade Triggers
+Usage Limit Reached:
+Message:
+"You’ve reached your thread limit. Upgrade to Pro for unlimited features!"
+CTA: Redirect to Upgrade Page.
+Pro-Only Features Used:
+Attempting to use Pro-exclusive features (e.g., advanced tones, long threads).
+Message:
+"This feature is only available on Pro. Upgrade now!"
+Upgrade Page
+Display:
+Pricing Table (Free, Pro comparison).
+Benefits of upgrading (e.g., unlimited threads, advanced tones, export options).
+Actions:
+User selects "Upgrade to Pro."
+Redirect to Stripe checkout for payment.
+Post-Payment:
+Redirect back to Dashboard with Pro features enabled.
+Confirmation Message:
+"You’re now a Pro user! Enjoy unlimited threads and advanced features."
+
+6. Account Flow
+Account Page
+User Details:
+Display plan (Free or Pro).
+Usage tracker (threads used/remaining).
+Subscription Management:
+Free Plan:
+CTA: "Upgrade to Pro."
+Pro Plan:
+Display billing info.
+Options: Update payment method, cancel subscription.
+Logout:
+Button redirects user to Login Page.
+
+7. Error Handling Flow
+Demo Limit Reached
+Message:
+"You’ve used your demo! Sign up for Free to continue using FlowThread."
+CTA: Redirect to Sign-Up Page.
+Thread Limit Reached (Free Plan)
+Message:
+"You’ve reached your thread limit. Upgrade to Pro for unlimited features!"
+CTA: Redirect to Upgrade Page.
+Pro Plan Payment Failed
+Message:
+"We couldn’t process your payment. Please update your payment details."
+CTA: Redirect to Account Page.
+Slack OAuth Error
+Message:
+"We couldn’t connect to Slack. Please try again."
+CTA: Redirect back to Sign-Up Page.
+
+8. Logout Flow
+Trigger:
+User clicks "Logout" in the profile dropdown.
+Outcome:
+Clear session cookies or JWT.
+Redirect to Login Page.
+
+10. Post-Sign-Up Onboarding Flow
+Step 1:
+Show welcome modal:
+"Welcome to FlowThread! Start by generating your first reply or summary."
+CTA: Redirect to Dashboard.
+Step 2:
+Highlight features with tooltips (e.g., "Paste thread context here to generate a reply.").
+Encourage first action with incentives:
+"Generate your first reply now to unlock Pro-exclusive features for free!"
+
+
+
