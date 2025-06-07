@@ -17,7 +17,7 @@ export function AnimatedArrowButton({
     children,
     size = "medium",
     className,
-    color = "black",
+    color = "primary",
     textColor = "white",
 }: AnimatedArrowButtonProps) {
     const sizeClasses = {

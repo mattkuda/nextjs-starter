@@ -60,7 +60,7 @@ export default function OnboardPage() {
         <div className="min-h-screen bg-gray-50 relative">
             <div className="absolute top-8 left-8 hidden md:block text-xl font-semibold">
                 <Boxes className="h-6 w-6 mr-2" />
-                FlowThread
+                NextJS Starter
             </div>
             <div className="flex items-center justify-center p-4 min-h-screen">
                 <div className="bg-white rounded-lg shadow-lg w-full max-w-md p-8">

@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { Header } from '@/components/Header'
 import { Lightbulb, Rocket, BookOpen, TicketIcon, ArrowLeftRight, BadgeCheck, MessageCircle } from 'lucide-react'
 import { Footer } from '../components/Footer'
-import { GradientCanvas } from '@/components/GradientCanvas'
+import { BackgroundGradientAnimation } from '@/components/ui/background-gradient-animation'
 import {
   Accordion,
   AccordionContent,
@@ -18,25 +18,27 @@ import { PricingDisplay } from '@/components/PricingDisplay'
 export default function Page() {
   return (
     <div className="min-h-screen">
-      <GradientCanvas />
-      <Header />
-      {/* Hero Section - transparent to show gradient */}
+      {/* Hero Section with Background Gradient Animation */}
       <div className="relative">
+        <BackgroundGradientAnimation
+          containerClassName="absolute inset-0 -z-10"
+        />
+        <Header />
         <div className="relative px-4 py-20 sm:px-6 lg:px-8 lg:py-32 lg:pb-16">
           <div className="mx-auto max-w-7xl text-center">
             <div className="opacity-0 animate-fade-in">
-              <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+              <h1 className="text-4xl font-bold tracking-tight text-white sm:text-6xl drop-shadow-lg">
                 Your personal AI assistant <br /> for a smarter workday.
               </h1>
-              <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-600">
-                FlowThread takes care of the details, so you don't have to.
+              <p className="mx-auto mt-6 max-w-2xl text-lg text-white/80 drop-shadow">
+                NextJS Starter takes care of the details, so you don't have to.
               </p>
             </div>
             <div className="opacity-0 animate-fade-in [animation-delay:400ms] [animation-fill-mode:forwards]">
               <AnimatedArrowButton href="/sign-up" size="large" className="mt-10">
                 Get started for free
               </AnimatedArrowButton>
-              <p className="mt-4 text-sm text-gray-600">No credit card required</p>
+              <p className="mt-4 text-sm text-white/70 drop-shadow">No credit card required</p>
             </div>
           </div>
         </div>
@@ -63,7 +65,7 @@ export default function Page() {
             <div className="h-[500px]">
               <Image
                 src="/DemoScreenshot.png"
-                alt="FlowThread Dashboard"
+                alt="NextJS Starter Dashboard"
                 width={2880}
                 height={1620}
                 className="w-full object-cover object-top"
@@ -83,7 +85,7 @@ export default function Page() {
                   Transform the Way You Work
                 </h2>
                 <p className="mt-4 text-lg text-gray-600">
-                  FlowThread gives you the tools to streamline and elevate your workflows.
+                  NextJS Starter gives you the tools to streamline and elevate your workflows.
                 </p>
                 <div className="mt-8 grid grid-cols-2 gap-4">
                   <div className="rounded-lg border border-gray-200 p-4 flex items-center gap-2">
@@ -196,15 +198,15 @@ export default function Page() {
               Frequently Asked Questions
             </h2>
             <p className="text-center text-gray-600 mb-12">
-              Everything you need to know about FlowThread and our services.
+              Everything you need to know about NextJS Starter and our services.
             </p>
             <Accordion type="single" collapsible className="space-y-4">
               <AccordionItem value="item-1" className="bg-white shadow-sm ring-1 ring-gray-200 rounded-lg px-6">
                 <AccordionTrigger className="text-left text-lg hover:no-underline py-4">
-                  What is FlowThread and how does it work?
+                  What is NextJS Starter and how does it work?
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-600 pb-4">
-                  FlowThread is an AI-powered platform that helps you streamline communication workflows.
+                  NextJS Starter is an AI-powered platform that helps you streamline communication workflows.
                   It uses advanced AI to help generate replies, summarize discussions, create documentation,
                   and structure tickets. Simply input your text or context, and our AI will help you craft
                   the perfect response or document.
@@ -268,7 +270,7 @@ export default function Page() {
               Supercharge Your <span className="text-3xl font-bold tracking-tight sm:text-4xl text-center mb-2 bg-gradient-to-r from-brand1 via-brand2 to-brand3 text-transparent bg-clip-text">Productivity</span>
             </h2>
             <p className="mx-auto mt-4 max-w-2xl text-gray-600">
-              FlowThread is your AI-powered ally for seamless communication and workflows.
+              NextJS Starter is your AI-powered ally for seamless communication and workflows.
             </p>
             <div className="text-center mt-4">
               <div className="opacity-0 animate-fade-in [animation-delay:400ms] [animation-fill-mode:forwards]">

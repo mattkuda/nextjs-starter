@@ -143,7 +143,7 @@ Output Format:
 
 export async function GET() {
     return NextResponse.json({
-        message: "FlowThread Ticket Creator API",
+        message: "NextJS Starter Ticket Creator API",
         supportedParams: [
             "projectContext (required)",
             "ticketPreferences (optional)",

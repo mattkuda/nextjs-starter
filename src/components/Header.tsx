@@ -27,7 +27,7 @@ export function Header() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
         <Link href="/" className="text-2xl font-bold text-gray-800 flex items-center">
           <Boxes className="h-6 w-6 mr-2" />
-          FlowThread
+          NextJS Starter
         </Link>
         <nav>
           {!isSignedIn && (

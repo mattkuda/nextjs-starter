@@ -99,7 +99,7 @@ export const TESTIMONIALS: Testimonial[] = [
     {
         name: "Erik",
         role: "Product Manager",
-        message: "I can't image life without FlowThread. It's a game-changer for my team.",
+        message: "I can't image life without NextJS Starter. It's a game-changer for my team.",
         imageUrl: "/erik.png"
     }
 ];

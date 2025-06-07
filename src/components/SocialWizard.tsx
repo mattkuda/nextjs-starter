@@ -21,7 +21,7 @@ interface SocialWizardResponse {
 
 const spinAnimation = "animate-spin"
 const devInitialState = {
-    instructions: 'Create me a post announcing my new Saas, FlowThread for simplifying work communication with AI.',
+    instructions: 'Create me a post announcing my new Saas, NextJS Starter for simplifying work communication with AI.',
     platform: 'twitter',
     tone: 'casual',
     variationLength: 'medium',

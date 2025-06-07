@@ -19,7 +19,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                 </DialogHeader>
                 <div className="space-y-6 py-4">
                     <p className="text-center text-gray-600">
-                        As we continue to grow FlowThread, your feedback helps us improve and better serve our community.
+                        As we continue to grow NextJS Starter, your feedback helps us improve and better serve our community.
                     </p>
 
                     <div className="flex flex-col gap-4">
@@ -66,7 +66,7 @@ export function FeedbackModal({ isOpen, onClose }: FeedbackModalProps) {
                     </div>
 
                     <p className="text-center text-sm text-gray-500">
-                        Your input directly shapes the future of FlowThread. Thank you for being part of our journey!
+                        Your input directly shapes the future of NextJS Starter. Thank you for being part of our journey!
                     </p>
                 </div>
             </DialogContent>

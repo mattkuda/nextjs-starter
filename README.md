@@ -1,6 +1,6 @@
-## FlowThread Setup Instructions
+## NextJS Starter Setup Instructions
 
-This guide walks you through setting up FlowThread, including Clerk for authentication, Supabase as the database, and Ngrok for webhook testing. Follow these steps to get the app running locally and deployed.
+This guide walks you through setting up NextJS Starter, including Clerk for authentication, Supabase as the database, and Ngrok for webhook testing. Follow these steps to get the app running locally and deployed.
 
 ### 1. Prerequisites
 - Ensure you have the following installed:
@@ -12,7 +12,7 @@ This guide walks you through setting up FlowThread, including Clerk for authenti
 
 ### 2. Clone the Repository
 - Run git clone <repository-url> in your terminal.
-- Navigate to the project directory with cd flowthread.
+- Navigate to the project directory with cd nextjs-starter.
 
 ### 3. Install Dependencies
 - Install required packages by running npm install.

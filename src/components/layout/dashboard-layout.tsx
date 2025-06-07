@@ -149,7 +149,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         <div className="px-4 py-2 flex justify-between items-center">
                             <div className="text-xl font-bold text-gray-800 flex items-center">
                                 <Boxes className="h-5 w-5 mr-2" />
-                                FlowThread
+                                NextJS Starter
                             </div>
                             <div className="flex items-center gap-2">
                                 {isLoading ? (

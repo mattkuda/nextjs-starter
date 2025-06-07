@@ -167,7 +167,7 @@ function getPlatformGuidelines(platform: string): string {
 
 export async function GET() {
     return NextResponse.json({
-        message: "FlowThread Post Generator API",
+        message: "NextJS Starter Post Generator API",
         supportedParams: [
             "instructions (required)",
             "platform",

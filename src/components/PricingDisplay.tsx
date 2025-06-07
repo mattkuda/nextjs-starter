@@ -92,7 +92,7 @@ export function PricingDisplay({ variant = 'page', currentPlan }: PricingDisplay
                                 <h3 className="text-2xl font-semibold text-gray-900">Free Plan</h3>
                             </div>
                             <p className="mt-4 text-gray-600">
-                                Perfect for trying out FlowThread's AI-powered features and basic workflows.
+                                Perfect for trying out NextJS Starter's AI-powered features and basic workflows.
                             </p>
                             <div className="mt-6 flex items-baseline">
                                 <span className="text-5xl font-bold tracking-tight">$0</span>

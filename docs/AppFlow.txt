@@ -1,5 +1,5 @@
 App Flow
-This app flow document details the user journey through FlowThread, outlining interactions, transitions, and key decisions to guide both development and design.
+This app flow document details the user journey through NextJS Starter, outlining interactions, transitions, and key decisions to guide both development and design.
 
 1. Entry Points
 Landing Page (For Unsigned Users)
@@ -25,7 +25,7 @@ Message: "Like what you see? Sign up for Free to unlock more!"
 Limits:
 1 request allowed.
 Post-demo message displayed:
-"You’ve used your demo! Sign up to continue using FlowThread."
+"You’ve used your demo! Sign up to continue using NextJS Starter."
 CTA: Button redirects to Sign-Up Page.
 
 3. Sign-Up Flow
@@ -39,7 +39,7 @@ Email (basic form: Email, Password, Confirm Password).
 Post-Sign-Up Actions:
 Redirect to Dashboard with Free Plan features enabled.
 Display onboarding message:
-"Welcome to FlowThread! Start generating replies, summaries, and tasks now!"
+"Welcome to NextJS Starter! Start generating replies, summaries, and tasks now!"
 
 4. Main Dashboard Flow (Post-Sign-Up)
 Default Tabs
@@ -121,7 +121,7 @@ Button redirects user to Login Page.
 7. Error Handling Flow
 Demo Limit Reached
 Message:
-"You’ve used your demo! Sign up for Free to continue using FlowThread."
+"You’ve used your demo! Sign up for Free to continue using NextJS Starter."
 CTA: Redirect to Sign-Up Page.
 Thread Limit Reached (Free Plan)
 Message:
@@ -146,7 +146,7 @@ Redirect to Login Page.
 10. Post-Sign-Up Onboarding Flow
 Step 1:
 Show welcome modal:
-"Welcome to FlowThread! Start by generating your first reply or summary."
+"Welcome to NextJS Starter! Start by generating your first reply or summary."
 CTA: Redirect to Dashboard.
 Step 2:
 Highlight features with tooltips (e.g., "Paste thread context here to generate a reply.").

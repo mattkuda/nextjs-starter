@@ -15,7 +15,7 @@ export default function GetStartedPage() {
                 <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
                     <div className="text-center">
                         <h1 className="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl">
-                            Getting Started with FlowThread
+                            Getting Started with NextJS Starter
                         </h1>
                         <p className="mt-4 text-lg text-gray-600">
                             Learn how to use our powerful AI tools to enhance your workflow
@@ -527,7 +527,7 @@ export default function GetStartedPage() {
 
                         </h2>
                         <p className="mx-auto mt-4 max-w-2xl text-gray-600">
-                            FlowThread is your AI-powered ally for seamless communication and workflows.
+                            NextJS Starter is your AI-powered ally for seamless communication and workflows.
                         </p>
                         <div className="text-center mt-4">
                             <div className="opacity-0 animate-fade-in [animation-delay:400ms] [animation-fill-mode:forwards]">

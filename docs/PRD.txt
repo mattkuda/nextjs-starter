@@ -1,6 +1,6 @@
-FlowThread Project Requirements Document (PRD)
+NextJS Starter Project Requirements Document (PRD)
 Project Overview
-FlowThread is a SaaS platform designed to simplify communication workflows by leveraging AI to generate thread replies, summarize discussions, craft actionable tasks, and assist in effective messaging. The MVP will provide the core functionality needed to attract individual users and small teams, emphasizing ease of use, customization, and clear upgrade paths.
+NextJS Starter is a SaaS platform designed to simplify communication workflows by leveraging AI to generate thread replies, summarize discussions, craft actionable tasks, and assist in effective messaging. The MVP will provide the core functionality needed to attract individual users and small teams, emphasizing ease of use, customization, and clear upgrade paths.
 
 1. Goals and Objectives
 Primary Goals:

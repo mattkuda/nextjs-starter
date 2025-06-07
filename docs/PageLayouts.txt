@@ -1,9 +1,9 @@
 Page layouts and structure
 1. Landing/Demo Page
-Purpose: Introduce FlowThread, provide a one-time demo for unsigned users, and encourage signups.
+Purpose: Introduce NextJS Starter, provide a one-time demo for unsigned users, and encourage signups.
 Layout
 Header:
-Logo: "FlowThread" (top-left).
+Logo: "NextJS Starter" (top-left).
 Navigation (top-right): "Features," "Pricing," "Login."
 CTA Button: "Sign Up Free."
 Hero Section:
@@ -35,7 +35,7 @@ Social Media Icons.
 Purpose: The main hub for generating outputs and managing account details.
 Layout
 Header:
-Logo: "FlowThread" (top-left).
+Logo: "NextJS Starter" (top-left).
 Navigation:
 "Dashboard" (default view).
 "Account."
@@ -120,7 +120,7 @@ Layout
 Header:
 Logo centered at the top.
 Sign-Up Section:
-Headline: "Get Started with FlowThread."
+Headline: "Get Started with NextJS Starter."
 Buttons:
 "Sign Up with Google."
 "Sign Up with Email."
@@ -138,7 +138,7 @@ Link: "Forgot Password?"
 6. Error and Limit Reached Pages
 Purpose: Handle errors and demo usage limits gracefully.
 Demo Limit Reached Page:
-Message: "You’ve reached your demo limit. Sign up to continue using FlowThread."
+Message: "You’ve reached your demo limit. Sign up to continue using NextJS Starter."
 CTA Button: "Sign Up for Free."
 Error Page:
 Message: "Something went wrong. Please try again later."

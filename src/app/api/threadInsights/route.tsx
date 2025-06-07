@@ -154,7 +154,7 @@ Do not include any extraneous text.`,
 
 export async function GET() {
     return NextResponse.json({
-        message: "FlowThread Thread Insights API",
+        message: "NextJS Starter Thread Insights API",
         supportedParams: [
             "threadType (required)",
             "threadContext (required)",
