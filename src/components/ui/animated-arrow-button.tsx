@@ -41,7 +41,7 @@ export function AnimatedArrowButton({
                 "group",
                 sizeClasses[size],
                 textColor === "white" ? "text-white" : "text-" + textColor,
-                color === "gradient" ? "bg-gradient-to-r from-brand1 via-brand2 to-brand3" : "bg-" + color,
+                color === "gradient" ? "bg-gradient-to-r from-primary to-secondary" : "bg-" + color,
                 className
             )}
         >

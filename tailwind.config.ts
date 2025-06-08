@@ -21,6 +21,7 @@ export default {
 					foreground: 'hsl(var(--popover-foreground))'
 				},
 				primary: 'hsl(var(--primary))',
+				secondary: 'hsl(var(--secondary))',
 				brand1: {
 					'100': '#fff0e6',
 					'200': '#ffe1cc',

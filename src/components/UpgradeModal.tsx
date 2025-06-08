@@ -1,16 +1,14 @@
 "use client"
 
 import { Dialog, DialogContent } from "@/components/ui/dialog"
-import { PricingDisplay } from "./PricingDisplay"
-import { SubscriptionStatus } from "@/lib/constants"
+import { PricingSection } from "@/components/landing/pricing-section"
 
 interface UpgradeModalProps {
     isOpen: boolean
     onClose: () => void
-    currentPlan: SubscriptionStatus
 }
 
-export function UpgradeModal({ isOpen, onClose, currentPlan }: UpgradeModalProps) {
+export function UpgradeModal({ isOpen, onClose }: UpgradeModalProps) {
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-7xl h-[90vh] flex flex-col p-0">
@@ -18,7 +16,7 @@ export function UpgradeModal({ isOpen, onClose, currentPlan }: UpgradeModalProps
                     <h2 className="text-4xl font-bold">Upgrade to Pro</h2>
                 </div>
                 <div className="flex-1 overflow-auto p-6">
-                    <PricingDisplay variant="modal" currentPlan={currentPlan} />
+                    <PricingSection isWaitlistMode={false} />
                 </div>
             </DialogContent>
         </Dialog>

@@ -240,7 +240,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     </div>
                 </div>
             </div>
-            <UpgradeModal currentPlan={userData?.subscription_status || SubscriptionStatus.FREE} isOpen={isUpgradeModalOpen} onClose={() => setIsUpgradeModalOpen(false)} />
+            <UpgradeModal isOpen={isUpgradeModalOpen} onClose={() => setIsUpgradeModalOpen(false)} />
             <FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
             <SettingsModal
                 isOpen={settingsOpen}
