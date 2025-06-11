@@ -29,7 +29,7 @@ export function HowItWorksSection() {
 
     return (
         <AnimatedSection id="how-it-works" className="py-16 md:py-24 bg-gray-50">
-            <div className="container px-4 md:px-6">
+            <div className="container px-4 md:px-6 mx-auto">
                 <div className="text-center mb-16">
                     <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
                         How it works
@@ -64,7 +64,7 @@ export function HowItWorksSection() {
                         </motion.div>
                     ))}
                 </div>
-            </div>
-        </AnimatedSection>
+            </div >
+        </AnimatedSection >
     )
 } 

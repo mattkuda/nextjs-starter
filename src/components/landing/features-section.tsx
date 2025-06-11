@@ -57,7 +57,7 @@ export function FeaturesSection() {
 
     return (
         <AnimatedSection id="features" className="py-16 md:py-24 bg-white">
-            <div className="container px-4 md:px-6">
+            <div className="container px-4 md:px-6 mx-auto">
                 <div className="text-center mb-16">
                     <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
                         Features
@@ -89,22 +89,6 @@ export function FeaturesSection() {
                         </motion.div>
                     ))}
                 </div>
-                <motion.div
-                    className="text-center mt-12"
-                    initial={{ opacity: 0, y: 50 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: "-100px" }}
-                    transition={{ duration: 0.6, delay: 0.6 }}
-                >
-                    <Button
-                        size="lg"
-                        className="bg-primary hover:bg-primary/90"
-                        onClick={scrollToHero}
-                    >
-                        Get Started
-                        <ArrowRightIcon className="ml-2 h-4 w-4" />
-                    </Button>
-                </motion.div>
             </div>
         </AnimatedSection>
     )

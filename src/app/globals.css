@@ -35,6 +35,14 @@ body {
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 
   .dark {
@@ -62,6 +70,14 @@ body {
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
 
@@ -108,6 +124,46 @@ body {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes scrollLeft {
+  0% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes scrollLeftVisible {
+  0% {
+    transform: translateX(0%);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
+}
+
+@keyframes marquee-vertical {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
   }
 }
 
@@ -164,6 +220,161 @@ body {
 
   .animate-slide-up {
     animation: slideUp 0.8s ease-out forwards;
+  }
+
+  .animate-scroll-left {
+    animation: scrollLeft 40s linear infinite;
+  }
+
+  .animate-scroll-left-visible {
+    animation: scrollLeftVisible 40s linear infinite;
+  }
+
+  .animate-scroll-left-paused {
+    animation: scrollLeft 40s linear infinite;
+    animation-play-state: paused;
+  }
+
+  .animate-scroll-left-visible-paused {
+    animation: scrollLeftVisible 40s linear infinite;
+    animation-play-state: paused;
+  }
+
+  .animate-marquee {
+    animation: marquee var(--duration) linear infinite;
+  }
+
+  .animate-marquee-vertical {
+    animation: marquee-vertical var(--duration) linear infinite;
+  }
+
+  .line-clamp-4 {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-6 {
+    display: -webkit-box;
+    -webkit-line-clamp: 6;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* Custom Tweet Styling */
+  .custom-tweet-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    border-radius: 12px !important;
+    border: 1px solid rgb(229, 231, 235) !important;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
+    background: white !important;
+    padding: 0 !important;
+  }
+
+  .custom-tweet-wrapper:hover {
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+    transition: box-shadow 0.3s ease !important;
+  }
+
+  /* Remove default margins and padding from react-tweet classes */
+  .custom-tweet-wrapper .react-tweet-theme {
+    margin: 0 !important;
+  }
+
+  .custom-tweet-wrapper [class*="tweet-container-module"] {
+    margin: 0 !important;
+  }
+
+  /* Remove padding and margins from article */
+  .custom-tweet-wrapper article {
+    margin: 0 !important;
+    padding: 16px !important;
+    border: none !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    background: transparent !important;
+    width: 100% !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+
+  /* Compact header styling */
+  .custom-tweet-wrapper [data-testid="tweetHeader"] {
+    margin-bottom: 8px !important;
+  }
+
+  /* Compact body styling */
+  .custom-tweet-wrapper [data-testid="tweetText"] {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+    margin-bottom: 8px !important;
+  }
+
+  /* Media styling */
+  .custom-tweet-wrapper [data-testid="tweetPhoto"],
+  .custom-tweet-wrapper [data-testid="videoPlayer"] {
+    border-radius: 8px !important;
+    margin-top: 8px !important;
+    margin-bottom: 8px !important;
+    max-height: 200px !important;
+    object-fit: cover !important;
+  }
+
+  /* Tweet info and engagement compact styling */
+  .custom-tweet-wrapper [data-testid="tweetEngagements"],
+  .custom-tweet-wrapper [data-testid="tweetInfo"] {
+    font-size: 12px !important;
+    margin-top: 8px !important;
+    margin-bottom: 4px !important;
+  }
+
+  /* Force light theme */
+  .custom-tweet-wrapper,
+  .custom-tweet-wrapper * {
+    color-scheme: light !important;
+  }
+
+  /* Hide follow button */
+  .custom-tweet-wrapper [data-testid="tweetButtonInline"],
+  .custom-tweet-wrapper [aria-label*="Follow"],
+  .custom-tweet-wrapper button[aria-label*="Follow"] {
+    display: none !important;
+  }
+
+  /* Hide reply button */
+  .custom-tweet-wrapper [data-testid="reply"],
+  .custom-tweet-wrapper [aria-label*="Reply"],
+  .custom-tweet-wrapper [title*="Reply"] {
+    display: none !important;
+  }
+
+  /* User info styling */
+  .custom-tweet-wrapper [data-testid="User-Name"] {
+    font-size: 14px !important;
+    font-weight: 600 !important;
+  }
+
+  .custom-tweet-wrapper [data-testid="Username"] {
+    font-size: 12px !important;
+    color: rgb(101, 119, 134) !important;
+  }
+
+  .custom-tweet-wrapper time {
+    font-size: 12px !important;
+    color: rgb(101, 119, 134) !important;
+  }
+
+  /* Fixed Tweet container styling - 350px width, 400px height, overflow hidden */
+  .tweet-container {
+    width: 350px !important;
+    height: 400px !important;
+    overflow: hidden !important;
+    flex-shrink: 0;
+    border-radius: 12px;
+    background: white;
   }
 
   .animate-first {

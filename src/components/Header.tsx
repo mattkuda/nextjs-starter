@@ -48,7 +48,7 @@ export function Header() {
                 </Link>
               </li>
               <li>
-                <Button className="bg-black text-white hover:bg-gray-800 rounded-full text-md" asChild>
+                <Button className="text-white hover:bg-gray-800 rounded-full text-md" asChild>
                   <Link href="/sign-up">
                     Get started for free
                     <ChevronRightIcon className="w-4 h-4" />

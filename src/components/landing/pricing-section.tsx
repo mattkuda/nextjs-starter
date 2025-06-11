@@ -31,7 +31,7 @@ export function PricingSection({ isWaitlistMode = false }: PricingSectionProps) 
 
     return (
         <AnimatedSection id="pricing" className="py-16 md:py-24 bg-muted/30">
-            <div className="container px-4 md:px-6">
+            <div className="container px-4 md:px-6 mx-auto">
                 <div className="text-center mb-16">
                     <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
                         Pricing
@@ -46,7 +46,7 @@ export function PricingSection({ isWaitlistMode = false }: PricingSectionProps) 
                         }
                     </p>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                     <motion.div
                         className="bg-background rounded-lg p-8 border"
                         initial={{ opacity: 0, y: 50 }}
