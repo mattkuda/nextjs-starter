@@ -1,0 +1,140 @@
+-- Core user data (identity/authentication)
+CREATE TABLE users (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    clerk_id TEXT UNIQUE NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    created_at TIMESTAMP DEFAULT now(),
+    modified_at TIMESTAMP DEFAULT now()
+);
+
+-- Customer data (billing/payment)
+CREATE TABLE customers (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    user_id UUID REFERENCES users(id) ON DELETE CASCADE NOT NULL,
+    stripe_customer_id TEXT UNIQUE,
+    billing_email TEXT,
+    tax_id TEXT,
+    tax_exempt TEXT CHECK (tax_exempt IN ('none', 'exempt', 'reverse')),
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP DEFAULT now(),
+    modified_at TIMESTAMP DEFAULT now()
+);
+
+-- Products (e.g., Free, Pro, Business)
+CREATE TABLE products (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    description TEXT,
+    active BOOLEAN DEFAULT true,
+    credits_per_month INTEGER DEFAULT 0,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP DEFAULT now(),
+    modified_at TIMESTAMP DEFAULT now()
+);
+
+-- Prices (e.g., $9.99/month, $99/year)
+CREATE TABLE prices (
+    id TEXT PRIMARY KEY,
+    product_id TEXT REFERENCES products(id) NOT NULL,
+    active BOOLEAN DEFAULT true,
+    description TEXT,
+    unit_amount BIGINT NOT NULL,
+    currency TEXT CHECK (char_length(currency) = 3),
+    type TEXT CHECK (type IN ('one_time', 'recurring')),
+    interval TEXT CHECK (interval IN ('day', 'week', 'month', 'year')),
+    interval_count INTEGER DEFAULT 1,
+    trial_period_days INTEGER,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP DEFAULT now(),
+    modified_at TIMESTAMP DEFAULT now()
+);
+
+-- Subscriptions
+CREATE TABLE subscriptions (
+    id TEXT PRIMARY KEY,
+    customer_id UUID REFERENCES customers(id) NOT NULL,
+    status TEXT CHECK (status IN ('trialing', 'active', 'canceled', 'incomplete', 'incomplete_expired', 'past_due', 'unpaid')),
+    price_id TEXT REFERENCES prices(id),
+    quantity INTEGER DEFAULT 1,
+    cancel_at_period_end BOOLEAN DEFAULT false,
+    current_period_start TIMESTAMP DEFAULT now(),
+    current_period_end TIMESTAMP DEFAULT now(),
+    ended_at TIMESTAMP,
+    cancel_at TIMESTAMP,
+    canceled_at TIMESTAMP,
+    trial_start TIMESTAMP,
+    trial_end TIMESTAMP,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP DEFAULT now(),
+    modified_at TIMESTAMP DEFAULT now()
+);
+
+-- Credits tracking
+CREATE TABLE credits (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    customer_id UUID REFERENCES customers(id) NOT NULL,
+    amount INTEGER NOT NULL,
+    type TEXT CHECK (type IN ('initial', 'usage', 'reset', 'refund')),
+    description TEXT,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP DEFAULT now()
+);
+
+-- Credit usage audit log
+CREATE TABLE credit_usage_log (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    customer_id UUID REFERENCES customers(id) NOT NULL,
+    feature_id TEXT NOT NULL,
+    credits_used INTEGER NOT NULL,
+    metadata JSONB DEFAULT '{}'::jsonb,
+    created_at TIMESTAMP DEFAULT now()
+);
+
+-- Indexes for performance
+CREATE INDEX idx_users_clerk_id ON users(clerk_id);
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_customers_user_id ON customers(user_id);
+CREATE INDEX idx_customers_stripe_id ON customers(stripe_customer_id);
+CREATE INDEX idx_subscriptions_customer_id ON subscriptions(customer_id);
+CREATE INDEX idx_subscriptions_status ON subscriptions(status);
+CREATE INDEX idx_credits_customer_id ON credits(customer_id);
+CREATE INDEX idx_credit_usage_customer_id ON credit_usage_log(customer_id);
+CREATE INDEX idx_credit_usage_created_at ON credit_usage_log(created_at);
+
+-- Function to update modified_at timestamp
+CREATE OR REPLACE FUNCTION update_modified_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.modified_at = now();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Triggers for modified_at
+CREATE TRIGGER update_users_modified_at 
+    BEFORE UPDATE ON users 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_modified_at_column();
+
+CREATE TRIGGER update_customers_modified_at 
+    BEFORE UPDATE ON customers 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_modified_at_column();
+
+CREATE TRIGGER update_products_modified_at 
+    BEFORE UPDATE ON products 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_modified_at_column();
+
+CREATE TRIGGER update_prices_modified_at 
+    BEFORE UPDATE ON prices 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_modified_at_column();
+
+CREATE TRIGGER update_subscriptions_modified_at 
+    BEFORE UPDATE ON subscriptions 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_modified_at_column();
+
