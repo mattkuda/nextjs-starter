@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
                 { status: 400 }
             );
         }
+
         // Cancel the subscription at the end of the billing period
         const canceledSubscription = await stripe.subscriptions.update(
             subscriptionId,

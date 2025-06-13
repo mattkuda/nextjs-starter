@@ -28,6 +28,215 @@ async function getCustomerEmail(customerId: string): Promise<string | null> {
     }
 }
 
+async function handleCustomerEvent(
+    event: Stripe.Event,
+    type: "created" | "updated" | "deleted"
+) {
+    const customer = event.data.object as Stripe.Customer;
+    const customerEmail = customer.email;
+
+    if (!customerEmail) {
+        return NextResponse.json({
+            status: 500,
+            error: "Customer email not found",
+        });
+    }
+
+    if (type === "created") {
+        const { error } = await supabase
+            .from("customers")
+            .insert({
+                user_id: customer.metadata.user_id,
+                stripe_customer_id: customer.id,
+                billing_email: customerEmail,
+                tax_id: customer.tax_ids?.data?.[0]?.id,
+                tax_exempt: customer.tax_exempt,
+                metadata: customer.metadata,
+            });
+
+        if (error) {
+            console.error("Error creating customer:", error);
+            return NextResponse.json({
+                status: 500,
+                error: "Error creating customer",
+            });
+        }
+    } else if (type === "updated") {
+        const { error } = await supabase
+            .from("customers")
+            .update({
+                billing_email: customerEmail,
+                tax_id: customer.tax_ids?.data?.[0]?.id,
+                tax_exempt: customer.tax_exempt,
+                metadata: customer.metadata,
+            })
+            .eq("stripe_customer_id", customer.id);
+
+        if (error) {
+            console.error("Error updating customer:", error);
+            return NextResponse.json({
+                status: 500,
+                error: "Error updating customer",
+            });
+        }
+    } else if (type === "deleted") {
+        const { error } = await supabase
+            .from("customers")
+            .delete()
+            .eq("stripe_customer_id", customer.id);
+
+        if (error) {
+            console.error("Error deleting customer:", error);
+            return NextResponse.json({
+                status: 500,
+                error: "Error deleting customer",
+            });
+        }
+    }
+
+    return NextResponse.json({
+        status: 200,
+        message: `Customer ${type} handled successfully`,
+    });
+}
+
+async function handlePriceEvent(
+    event: Stripe.Event,
+    type: "created" | "updated" | "deleted"
+) {
+    const price = event.data.object as Stripe.Price;
+
+    if (type === "created") {
+        const { error } = await supabase
+            .from("prices")
+            .insert({
+                id: price.id,
+                product_id: price.product as string,
+                active: price.active,
+                description: price.nickname,
+                unit_amount: price.unit_amount,
+                currency: price.currency,
+                type: price.type,
+                interval: price.recurring?.interval,
+                interval_count: price.recurring?.interval_count,
+                trial_period_days: price.recurring?.trial_period_days,
+                metadata: price.metadata,
+            });
+
+        if (error) {
+            console.error("Error creating price:", error);
+            return NextResponse.json({
+                status: 500,
+                error: "Error creating price",
+            });
+        }
+    } else if (type === "updated") {
+        const { error } = await supabase
+            .from("prices")
+            .update({
+                active: price.active,
+                description: price.nickname,
+                unit_amount: price.unit_amount,
+                currency: price.currency,
+                type: price.type,
+                interval: price.recurring?.interval,
+                interval_count: price.recurring?.interval_count,
+                trial_period_days: price.recurring?.trial_period_days,
+                metadata: price.metadata,
+            })
+            .eq("id", price.id);
+
+        if (error) {
+            console.error("Error updating price:", error);
+            return NextResponse.json({
+                status: 500,
+                error: "Error updating price",
+            });
+        }
+    } else if (type === "deleted") {
+        const { error } = await supabase
+            .from("prices")
+            .delete()
+            .eq("id", price.id);
+
+        if (error) {
+            console.error("Error deleting price:", error);
+            return NextResponse.json({
+                status: 500,
+                error: "Error deleting price",
+            });
+        }
+    }
+
+    return NextResponse.json({
+        status: 200,
+        message: `Price ${type} handled successfully`,
+    });
+}
+
+async function handleProductEvent(
+    event: Stripe.Event,
+    type: "created" | "updated" | "deleted"
+) {
+    const product = event.data.object as Stripe.Product;
+
+    if (type === "created") {
+        const { error } = await supabase
+            .from("products")
+            .insert({
+                id: product.id,
+                name: product.name,
+                description: product.description,
+                active: product.active,
+                metadata: product.metadata,
+            });
+
+        if (error) {
+            console.error("Error creating product:", error);
+            return NextResponse.json({
+                status: 500,
+                error: "Error creating product",
+            });
+        }
+    } else if (type === "updated") {
+        const { error } = await supabase
+            .from("products")
+            .update({
+                name: product.name,
+                description: product.description,
+                active: product.active,
+                metadata: product.metadata,
+            })
+            .eq("id", product.id);
+
+        if (error) {
+            console.error("Error updating product:", error);
+            return NextResponse.json({
+                status: 500,
+                error: "Error updating product",
+            });
+        }
+    } else if (type === "deleted") {
+        const { error } = await supabase
+            .from("products")
+            .delete()
+            .eq("id", product.id);
+
+        if (error) {
+            console.error("Error deleting product:", error);
+            return NextResponse.json({
+                status: 500,
+                error: "Error deleting product",
+            });
+        }
+    }
+
+    return NextResponse.json({
+        status: 200,
+        message: `Product ${type} handled successfully`,
+    });
+}
+
 async function handleSubscriptionEvent(
     event: Stripe.Event,
     type: "created" | "updated" | "deleted"
@@ -135,16 +344,44 @@ async function webhooksHandler(
         );
 
         switch (event.type) {
+            // Customer events
+            case "customer.created":
+                return handleCustomerEvent(event, "created");
+            case "customer.updated":
+                return handleCustomerEvent(event, "updated");
+            case "customer.deleted":
+                return handleCustomerEvent(event, "deleted");
+
+            // Price events
+            case "price.created":
+                return handlePriceEvent(event, "created");
+            case "price.updated":
+                return handlePriceEvent(event, "updated");
+            case "price.deleted":
+                return handlePriceEvent(event, "deleted");
+
+            // Product events
+            case "product.created":
+                return handleProductEvent(event, "created");
+            case "product.updated":
+                return handleProductEvent(event, "updated");
+            case "product.deleted":
+                return handleProductEvent(event, "deleted");
+
+            // Subscription events
             case "customer.subscription.created":
                 return handleSubscriptionEvent(event, "created");
             case "customer.subscription.updated":
                 return handleSubscriptionEvent(event, "updated");
             case "customer.subscription.deleted":
                 return handleSubscriptionEvent(event, "deleted");
+
+            // Invoice events
             case "invoice.payment_succeeded":
                 return handleInvoiceEvent(event, "succeeded");
             case "invoice.payment_failed":
                 return handleInvoiceEvent(event, "failed");
+
             default:
                 return NextResponse.json({
                     status: 400,
