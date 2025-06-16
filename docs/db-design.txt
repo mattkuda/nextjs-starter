@@ -5,9 +5,9 @@ create table users (
   email text not null,
   first_name text,
   last_name text,
-  stripe_subscription_id text unique
-  created_at timestamp zone default now()
-  modified_at timestamp default now()
+  stripe_subscription_id text unique,
+  created_at timestamp with time zone default now(),
+  modified_at timestamp with time zone default now()
 );
 
 -- Plans available for subscription
@@ -31,7 +31,9 @@ create table subscriptions (
   end_date date not null,
   is_active boolean default true,
   cancel_at_period_end boolean default false,
-  created_at timestamp with time zone default now()
+  created_at timestamp with time zone default now(),
+  -- Ensure end_date is after start_date
+  constraint valid_subscription_dates check (end_date > start_date)
 );
 
 -- Enforce 1 active sub per user
@@ -47,10 +49,12 @@ create table credit_usage (
   usage_window_start date not null,
   usage_window_end date not null,
   credits_used integer default 0,
-  created_at timestamp with time zone default now()
+  created_at timestamp with time zone default now(),
+  -- Ensure window end is after start
+  constraint valid_usage_window check (usage_window_end > usage_window_start)
 );
 
--- Optional: detailed audit log per credit-consuming action
+-- Audit log per credit-consuming action
 create table credit_usage_log (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) not null,
@@ -59,10 +63,75 @@ create table credit_usage_log (
   created_at timestamp with time zone default now()
 );
 
--- Optional: price history for plans (e.g. $10 -> $20)
-create table plan_history (
-  id uuid primary key default gen_random_uuid(),
-  plan_id uuid references plans(id) on delete cascade,
-  price_cents integer not null,
-  updated_at timestamp with time zone default now()
-);
+-- Indexes for performance
+create index idx_users_email on users(email);
+create index idx_users_stripe_sub on users(stripe_subscription_id);
+create index idx_plans_active on plans(is_active);
+create index idx_subscriptions_user on subscriptions(user_id);
+create index idx_subscriptions_plan on subscriptions(plan_id);
+create index idx_subscriptions_stripe on subscriptions(stripe_subscription_id);
+create index idx_subscriptions_dates on subscriptions(start_date, end_date);
+create index idx_credit_usage_user on credit_usage(user_id);
+create index idx_credit_usage_sub on credit_usage(subscription_id);
+create index idx_credit_usage_window on credit_usage(usage_window_start, usage_window_end);
+create index idx_credit_usage_log_user on credit_usage_log(user_id);
+create index idx_credit_usage_log_feature on credit_usage_log(feature_id);
+create index idx_credit_usage_log_created on credit_usage_log(created_at);
+
+-- Function to update modified_at timestamp
+create or replace function update_modified_at_column()
+returns trigger as $$
+begin
+  new.modified_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+-- Trigger for users modified_at
+create trigger update_users_modified_at
+  before update on users
+  for each row
+  execute function update_modified_at_column();
+
+-- Enable Row Level Security (RLS)
+alter table users enable row level security;
+alter table plans enable row level security;
+alter table subscriptions enable row level security;
+alter table credit_usage enable row level security;
+alter table credit_usage_log enable row level security;
+
+-- Block all access by default
+create policy "Block all access"
+  on users
+  for all
+  using (false);
+
+create policy "Block all access"
+  on plans
+  for all
+  using (false);
+
+create policy "Block all access"
+  on subscriptions
+  for all
+  using (false);
+
+create policy "Block all access"
+  on credit_usage
+  for all
+  using (false);
+
+create policy "Block all access"
+  on credit_usage_log
+  for all
+  using (false);
+
+-- Revoke all permissions from anon and authenticated roles
+revoke all on all tables in schema public from anon, authenticated;
+revoke all on all sequences in schema public from anon, authenticated;
+revoke all on schema public from anon, authenticated;
+
+-- Grant usage only to service role
+grant usage on schema public to service_role;
+grant all on all tables in schema public to service_role;
+grant all on all sequences in schema public to service_role;

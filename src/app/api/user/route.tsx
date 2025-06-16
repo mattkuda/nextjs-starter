@@ -9,7 +9,6 @@ const supabase = createClient(
 export async function GET() {
     try {
         const { userId } = await auth();
-
         if (!userId) {
             return new NextResponse('Unauthorized', { status: 401 })
         }
@@ -17,7 +16,7 @@ export async function GET() {
         const { data: user, error } = await supabase
             .from('users')
             .select('*')
-            .eq('clerk_id', userId)
+            .eq('clerk_user_id', userId)
             .single()
 
         if (error) {
@@ -47,7 +46,7 @@ export async function PUT(request: Request) {
         const { data, error } = await supabase
             .from('users')
             .update(body)
-            .eq('clerk_id', userId)
+            .eq('clerk_user_id', userId)
             .select()
             .single()
 

@@ -26,6 +26,12 @@ const shouldRedirectToSignIn = createRouteMatcher([
     "/journal(.*)",
 ]);
 
+// List of API routes that don't need authentication
+const publicApiRoutes = [
+    "/api/auth/webhook",
+    "/api/payments/webhook",
+];
+
 export default clerkMiddleware(async (auth, req) => {
     const { userId } = await auth();
     const { pathname } = req.nextUrl;
@@ -46,8 +52,18 @@ export default clerkMiddleware(async (auth, req) => {
         return NextResponse.redirect(url)
     }
 
-    // ✅ Allow API requests to pass through
+    // ✅ Handle API routes
     if (isApiRoute(req)) {
+        // Allow public API routes without authentication
+        if (publicApiRoutes.some(route => pathname.startsWith(route))) {
+            return NextResponse.next();
+        }
+
+        // Require authentication for all other API routes
+        if (!userId) {
+            return new NextResponse('Unauthorized', { status: 401 });
+        }
+
         return NextResponse.next();
     }
 
@@ -78,11 +94,10 @@ export const config = {
     matcher: [
         /*
          * Match all request paths except for the ones starting with:
-         * - api (API routes)
          * - _next/static (static files)
          * - _next/image (image optimization files)
          * - favicon.ico (favicon file)
          */
-        '/((?!api|_next/static|_next/image|favicon.ico).*)',
+        '/((?!_next/static|_next/image|favicon.ico).*)',
     ],
 };

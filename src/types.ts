@@ -2,7 +2,7 @@ import { SubscriptionStatus } from './lib/constants'
 
 export type User = {
     id: string;
-    clerk_id: string;
+    clerk_user_id: string;
     email: string;
     first_name?: string;
     last_name?: string;

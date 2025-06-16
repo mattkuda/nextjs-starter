@@ -25,7 +25,7 @@ export function SubscriptionDetails({ user }: SubscriptionDetailsProps) {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ clerkId: user?.clerk_id, userId: user?.id }),
+                body: JSON.stringify({ clerkId: user?.clerk_user_id, userId: user?.id }),
             });
 
             const data = await response.json();

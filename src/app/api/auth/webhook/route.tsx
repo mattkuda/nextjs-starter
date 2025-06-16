@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { Webhook } from "svix";
 import { createClient } from "@supabase/supabase-js";
-import { User } from "../../../../types";
-import { CREDITS_LIMITS } from "../../../../lib/constants";
-import { SubscriptionStatus } from "../../../../lib/constants";
 
 const supabase = createClient(
     process.env.SUPABASE_URL!,
@@ -96,17 +93,15 @@ async function handleUserCreated(data: {
     const email = email_addresses?.[0]?.email_address;
 
     const { error } = await supabase.from("users").insert({
-        clerk_id: id,
+        clerk_user_id: id,
         email,
         first_name,
         last_name,
-        subscription_status: SubscriptionStatus.FREE,
-        credits: CREDITS_LIMITS[SubscriptionStatus.FREE]
-    } as User);
+    });
 
     if (error) {
         console.error("Error inserting user:", error);
-        throw new Error("Failed to insert user into Supabase.");
+        throw new Error("Failed to insert user into database.");
     }
 }
 
@@ -126,20 +121,24 @@ async function handleUserUpdated(data: {
             first_name,
             last_name,
         })
-        .eq("clerk_id", id);
+        .eq("clerk_user_id", id);
 
     if (error) {
         console.error("Error updating user:", error);
-        throw new Error("Failed to update user in Supabase.");
+        throw new Error("Failed to update user in database.");
     }
 }
 
 async function handleUserDeleted(data: { id: string }) {
     const { id } = data;
-    const { error } = await supabase.from("users").delete().eq("clerk_id", id);
+
+    const { error } = await supabase
+        .from("users")
+        .delete()
+        .eq("clerk_user_id", id);
 
     if (error) {
         console.error("Error deleting user:", error);
-        throw new Error("Failed to delete user from Supabase.");
+        throw new Error("Failed to delete user from database.");
     }
 }

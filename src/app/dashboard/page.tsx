@@ -1,18 +1,20 @@
 'use client'
 
-import { ThreadInsights } from '../../components/ThreadInsights'
+import { Dashboard } from '../../components/Dashboard'
 import { DashboardLayout } from '../../components/layout/dashboard-layout'
-import { Lightbulb } from 'lucide-react'
+import { Home } from 'lucide-react'
 
 export default function DashboardPage() {
     return (
         <DashboardLayout>
-            <h1 className="text-3xl font-bold mb-4 flex items-center">
-                <Lightbulb className="w-6 h-6 mr-2" />
-                Thread Insights
-            </h1>
-            <p className="text-gray-600 mb-8">Summarize threads, detect action items, and generate impactful replies.</p>
-            <ThreadInsights />
+            <div className="mb-8">
+                <h1 className="text-3xl font-bold mb-2 flex items-center">
+                    <Home className="w-7 h-7 mr-3 text-primary" />
+                    Dashboard
+                </h1>
+                <p className="text-muted-foreground">Welcome back! Here's an overview of your account and recent activity.</p>
+            </div>
+            <Dashboard />
         </DashboardLayout>
     )
 }

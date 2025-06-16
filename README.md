@@ -33,7 +33,7 @@ This guide walks you through setting up NextJS Starter, including Clerk for auth
 
 ### 6. Configure Supabase
 Log in to Supabase and create a new project.
-- In the SQL editor, create a users table with columns such as id, clerk_id, email, and other relevant fields.
+- In the SQL editor, create a users table with columns such as id, clerk_user_id, email, and other relevant fields.
 - Add triggers and policies for updating timestamps and managing data securely.
 
 ### 7. Run Ngrok for Webhook Testing

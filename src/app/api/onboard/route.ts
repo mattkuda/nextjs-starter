@@ -33,7 +33,7 @@ export async function POST(req: Request) {
                 organization_name: body.organizationName,
                 job_title: body.jobTitle,
             })
-            .eq('clerk_id', userId);
+            .eq('clerk_user_id', userId);
 
         if (supabaseError) {
             console.error('Supabase error:', supabaseError)

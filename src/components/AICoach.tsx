@@ -61,14 +61,14 @@ function TypewriterEffect({ content, onComplete }: { content: string; onComplete
 
     return (
         <div className="flex flex-col space-y-1">
-            <div className={`rounded-lg p-3 bg-gray-100`}>
+            <div className={`rounded-lg p-3 bg-muted`}>
                 <ReactMarkdown
-                    className="text-gray-800 prose prose-sm max-w-none"
+                    className="text-foreground prose prose-sm max-w-none"
                     components={{
                         strong: (props: React.ComponentPropsWithoutRef<'strong'>) => <span className="font-semibold">{props.children}</span>,
                         em: (props: React.ComponentPropsWithoutRef<'em'>) => <span className="italic">{props.children}</span>,
                         code: (props: React.ComponentPropsWithoutRef<'code'>) => (
-                            <code className="bg-gray-200 rounded px-1 py-0.5 text-sm">{props.children}</code>
+                            <code className="bg-accent rounded px-1 py-0.5 text-sm">{props.children}</code>
                         ),
                         ul: (props: React.ComponentPropsWithoutRef<'ul'>) => <ul className="list-disc pl-4 my-2">{props.children}</ul>,
                         ol: (props: React.ComponentPropsWithoutRef<'ol'>) => <ol className="list-decimal pl-4 my-2">{props.children}</ol>,
@@ -172,11 +172,11 @@ export function AICoach() {
     }
 
     return (
-        <div className="flex flex-col h-full bg-white shadow-md rounded-lg">
+        <div className="flex flex-col h-full bg-card shadow-md rounded-lg border">
             {messages.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center p-4">
                     <div className="text-center mb-6">
-                        <h2 className="text-2xl font-bold">What can I help with?</h2>
+                        <h2 className="text-2xl font-bold text-foreground">What can I help with?</h2>
                     </div>
                     <div className="w-full max-w-lg">
                         <Textarea
@@ -184,13 +184,13 @@ export function AICoach() {
                             onChange={handleTextareaChange}
                             onKeyDown={handleKeyDown}
                             placeholder="Message AI Coach..."
-                            className="w-full resize-none bg-gray-50 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus-visible:ring-1 focus-visible:ring-gray-200 rounded-md"
+                            className="w-full resize-none bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring rounded-md"
                             rows={3}
                         />
                         <Button
                             onClick={() => handleSendMessage()}
                             disabled={!input.trim()}
-                            className="w-full mt-3 bg-gradient-to-r from-brand1-200 via-brand2-200 to-brand3-200 text-gray-800 hover:opacity-90"
+                            className="w-full mt-3"
                         >
                             Send
                         </Button>
@@ -240,8 +240,8 @@ export function AICoach() {
                                             onComplete={() => { }}
                                         />
                                     ) : (
-                                        <div className="rounded-lg p-3 bg-gradient-to-r from-rose-200 via-pink-200 to-fuchsia-200">
-                                            <p className="text-gray-800 whitespace-pre-wrap">{message.content}</p>
+                                        <div className="rounded-lg p-3 bg-primary/10 border border-primary/20">
+                                            <p className="text-foreground whitespace-pre-wrap">{message.content}</p>
                                         </div>
                                     )}
                                 </div>
@@ -271,23 +271,22 @@ export function AICoach() {
                         <div ref={messagesEndRef} />
                     </div>
                     {/* Input Container */}
-                    <div className="border-t bg-white p-4">
+                    <div className="border-t bg-card p-4">
                         <div className="relative flex items-end">
                             <Textarea
                                 value={input}
                                 onChange={handleTextareaChange}
                                 onKeyDown={handleKeyDown}
                                 placeholder="Message AI Coach..."
-                                className="min-h-[44px] max-h-24 w-full resize-none bg-gray-50 px-3 py-3 pr-14 text-sm text-gray-900 placeholder:text-gray-500 focus-visible:ring-1 focus-visible:ring-blue-500 overflow-y-auto"
+                                className="min-h-[44px] max-h-24 w-full resize-none bg-muted px-3 py-3 pr-14 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring overflow-y-auto"
                             />
                             <div className="absolute right-2 bottom-4 flex items-center gap-2">
                                 <Button
                                     size="icon"
-                                    variant="ghost"
                                     onClick={() => handleSendMessage()}
                                     disabled={isLoading || !input.trim()}
                                     className={cn(
-                                        "rounded-full p-2 bg-gradient-to-r from-rose-200 via-pink-200 to-fuchsia-200 hover:opacity-90 text-gray-800",
+                                        "rounded-full p-2",
                                         (!input.trim() || isLoading) && "opacity-50"
                                     )}
                                 >
@@ -295,7 +294,7 @@ export function AICoach() {
                                 </Button>
                             </div>
                         </div>
-                        <p className="mt-2 text-[11px] text-gray-500">
+                        <p className="mt-2 text-[11px] text-muted-foreground">
                             AI Coach can make mistakes. Consider checking important information.
                         </p>
                     </div>

@@ -10,9 +10,8 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { MessageSquare, Lightbulb, BookOpen, TicketIcon, HelpCircle, User as UserIcon, Rocket, Boxes, MessageCircle, ArrowLeftRight, LogOut, ChevronDown, Clock, ZapIcon, Crown, BadgeCheck } from 'lucide-react'
+import { Home, MessageCircle, Settings, User as UserIcon, LogOut, ChevronDown, Clock, ZapIcon, Crown } from 'lucide-react'
 import { UpgradeModal } from '../UpgradeModal'
-import { FeedbackModal } from '../FeedbackModal'
 import { SubscriptionStatus } from '../../lib/constants'
 import { User } from "@/types"
 import { useQuery } from '@tanstack/react-query'
@@ -20,6 +19,9 @@ import axios from 'axios'
 import { SettingsModal } from '../SettingsModal'
 import { useClerk } from "@clerk/nextjs";
 import { toast } from '../../hooks/use-toast'
+import { ThemeToggle } from '../ui/theme-toggle'
+import { Card, CardContent } from '../ui/card'
+import Image from 'next/image'
 
 interface NavItem {
     label: string
@@ -28,13 +30,8 @@ interface NavItem {
 }
 
 const navItems: NavItem[] = [
-    { label: 'Thread Insights', href: '/dashboard', icon: Lightbulb },
-    { label: 'Thread Starter', href: '/dashboard/thread-starter', icon: Rocket },
-    { label: 'Docs Writer', href: '/dashboard/documentation-writer', icon: BookOpen },
-    { label: 'Ticket Creator', href: '/dashboard/ticket-creator', icon: TicketIcon },
-    { label: 'Tone Converter', href: '/dashboard/tone-converter', icon: ArrowLeftRight },
-    { label: 'Social Wizard', href: '/dashboard/social-wizard', icon: BadgeCheck },
-    { label: 'AI Coach', href: '/dashboard/ai-coach', icon: MessageCircle },
+    { label: 'Dashboard', href: '/dashboard', icon: Home },
+    { label: 'AI Chat', href: '/dashboard/ai-chat', icon: MessageCircle },
 ]
 
 interface DashboardLayoutProps {
@@ -44,7 +41,6 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
     const pathname = usePathname()
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-    const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false)
     const [activeSettingsTab, setActiveSettingsTab] = useState<'profile' | 'billing' | 'settings'>('profile')
     const { data: userData, isLoading } = useQuery({
@@ -93,19 +89,19 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
     return (
         <>
-            <div className="min-h-screen flex bg-gray-100">
+            <div className="min-h-screen flex bg-background">
                 {/* Fixed Sidebar */}
-                <nav className="w-64 bg-white shadow-sm min-h-screen fixed left-0 flex flex-col pt-14">
+                <nav className="w-64 bg-card border-r min-h-screen fixed left-0 flex flex-col pt-16 z-10">
                     <div className="flex-1">
-                        <div className="px-4 py-2 text-sm font-medium text-gray-500 uppercase tracking-wider">
-                            Tools
+                        <div className="px-4 py-2 text-sm font-medium text-muted-foreground uppercase tracking-wider">
+                            Main
                         </div>
-                        <ul className="py-2 space-y-3">
+                        <ul className="py-2 space-y-1">
                             {navItems.map((item) => (
                                 <li key={item.href}>
                                     <Link
                                         href={item.href}
-                                        className={`flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 ${pathname === item.href ? 'bg-gray-100 text-blue-600' : ''
+                                        className={`flex items-center px-4 py-2.5 mx-2 text-foreground hover:bg-accent rounded-lg transition-colors ${pathname === item.href ? 'bg-primary/10 text-primary border border-primary/20' : ''
                                             }`}
                                     >
                                         <item.icon className="h-5 w-5 mr-3" />
@@ -115,133 +111,142 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                             ))}
                         </ul>
                     </div>
+                    {/* Theme Toggle */}
+                    <div className="px-2">
+                        <ThemeToggle />
+                    </div>
+                    <div className="mt-auto p-4 space-y-4">
+                        {/* Plan Status */}
+                        <Card className="bg-muted/30">
+                            <CardContent className="p-3">
+                                <div className="flex items-center gap-2">
+                                    {userData?.subscription_status === SubscriptionStatus.PRO ? (
+                                        <>
+                                            <Crown className="h-4 w-4 text-primary" />
+                                            <div>
+                                                <p className="text-sm font-medium">Pro Plan</p>
+                                                <p className="text-xs text-muted-foreground">All features unlocked</p>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ZapIcon className="h-4 w-4 text-muted-foreground" />
+                                            <div>
+                                                <p className="text-sm font-medium">Free Plan</p>
+                                                <p className="text-xs text-muted-foreground">Limited features</p>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
 
-                    <div className="mt-auto">
-                        <div className="py-3 border-t border-gray-200">
-                            <ul className="py-4 space-y-3">
-                                <li key="feedback">
-                                    <div
-                                        onClick={() => setIsFeedbackModalOpen(true)}
-                                        className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100 cursor-pointer"
-                                    >
-                                        <MessageSquare className="h-5 w-5 mr-3" />
-                                        Feedback
-                                    </div>
-                                </li>
-                                <li key="get-started">
-                                    <Link
-                                        href={"/get-started"}
-                                        className={`flex items-center px-4 py-2 text-gray-600 hover:bg-gray-100`}
-                                    >
-                                        <HelpCircle className="h-5 w-5 mr-3" />
-                                        Get Started
-                                    </Link>
-                                </li>
-                            </ul>
-                        </div>
+
+                        {/* Settings */}
+                        <Button
+                            variant="ghost"
+                            className="w-full justify-start px-2"
+                            onClick={() => {
+                                setActiveSettingsTab('profile')
+                                setSettingsOpen(true)
+                            }}
+                        >
+                            <Settings className="h-4 w-4 mr-3" />
+                            Settings
+                        </Button>
                     </div>
                 </nav>
 
                 {/* Main Content Area */}
-                <div className="flex-1 ml-64 bg-gray-100">
-                    {/* Top Header - moved outside and made full width */}
-                    <div className="fixed top-0 left-0 right-0 z-10 bg-gradient-to-r from-brand1-100 via-brand2-100 to-brand3-100 shadow-sm">
-                        <div className="px-4 py-2 flex justify-between items-center">
-                            <div className="text-xl font-bold text-gray-800 flex items-center">
-                                <Boxes className="h-5 w-5 mr-2" />
-                                NextJS Starter
+                <div className="flex-1 ml-64 bg-background">
+                    {/* Top Header - clean white background */}
+                    <div className="fixed top-0 left-0 right-0 z-20 bg-background border-b">
+                        <div className="flex">
+                            {/* Logo section with border */}
+                            <div className="w-64 bg-card border-r px-4 py-3 flex items-center">
+                                <div className="text-xl font-bold text-foreground flex items-center">
+                                    <Image src="/icon.png" alt="Logo" width={32} height={32} className="mr-2" />
+                                    NextJS Starter
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                {isLoading ? (
-                                    <div className="h-9 w-24 animate-pulse bg-gray-200 rounded" />
-                                ) : userData?.subscription_status !== SubscriptionStatus.PRO ? (
-                                    <Button variant="outline" onClick={() => setIsUpgradeModalOpen(true)}>
-                                        <ZapIcon className="h-5 w-5 mr-2" />
-                                        Upgrade to Pro
-                                    </Button>
-                                ) : (
-                                    <div className="flex items-center">
-                                        <Crown className="h-5 w-5 mr-2 text-gray-500" />
-                                        <span className="text-sm text-gray-600">You're on the pro plan</span>
-                                    </div>
-                                )}
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button
-                                            variant="ghost"
-                                            className="border-width-0 outline-none hover:bg-gray-500/10 px-0 focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0"
-                                        >
-                                            <div className="flex items-center gap-2 border-width-0 p-2 rounded-md">
-                                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-brand2-500 to-brand3-500">
-                                                    <span className="text-md font-semibold text-white">{initials}</span>
-                                                </div>
-                                                <ChevronDown className="h-5 w-5" />
-                                            </div>
+                            {/* Right section */}
+                            <div className="flex-1 px-4 py-3 flex justify-end items-center">
+                                <div className="flex items-center gap-2">
+                                    {isLoading ? (
+                                        <div className="h-9 w-24 animate-pulse bg-muted rounded" />
+                                    ) : userData?.subscription_status !== SubscriptionStatus.PRO ? (
+                                        <Button onClick={() => setIsUpgradeModalOpen(true)}>
+                                            <ZapIcon className="h-4 w-4 mr-2" />
+                                            Upgrade to Pro
                                         </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent className="w-[250px]" align="end">
-                                        <div className="flex flex-col items-center gap-4 p-2">
-                                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-r from-brand2-500 to-brand3-500">
-                                                <span className="text-xl font-semibold text-white">
-                                                    {initials}
-                                                </span>
+                                    ) : null}
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button
+                                                variant="ghost"
+                                                className="outline-none focus-visible:ring-0 focus-visible:ring-offset-0 focus:ring-0"
+                                            >
+                                                <div className="flex items-center gap-2 p-1 rounded-md">
+                                                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
+                                                        <span className="text-sm font-semibold text-primary-foreground">{initials}</span>
+                                                    </div>
+                                                    <ChevronDown className="h-4 w-4" />
+                                                </div>
+                                            </Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent className="w-[250px]" align="end">
+                                            <div className="flex flex-col items-center gap-4 p-2">
+                                                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-primary">
+                                                    <span className="text-xl font-semibold text-primary-foreground">
+                                                        {initials}
+                                                    </span>
+                                                </div>
+                                                <div className="flex flex-col items-center">
+                                                    <span className="font-semibold">{userData?.first_name} {userData?.last_name}</span>
+                                                    <span className="text-sm text-muted-foreground">{userData?.email}</span>
+                                                </div>
                                             </div>
-                                            <div className="flex flex-col items-center">
-                                                <span className="font-semibold">{userData?.first_name} {userData?.last_name}</span>
-                                                <span className="text-sm text-muted-foreground">{userData?.email}</span>
-                                            </div>
-                                        </div>
-                                        <DropdownMenuItem
-                                            onClick={() => {
-                                                setActiveSettingsTab('profile')
-                                                setSettingsOpen(true)
-                                            }}
-                                            className="hover:cursor-pointer"
-                                        >
-                                            <UserIcon className="mr-3 h-4 w-4" />
-                                            Profile
-                                        </DropdownMenuItem>
-                                        <DropdownMenuItem
-                                            onClick={() => {
-                                                setActiveSettingsTab('billing')
-                                                setSettingsOpen(true)
-                                            }}
-                                            className="hover:cursor-pointer"
-                                        >
-                                            <Clock className="mr-3 h-4 w-4" />
-                                            Plan & Billing
-                                        </DropdownMenuItem>
-                                        {/* <DropdownMenuItem
-                                            onClick={() => {
-                                                setActiveSettingsTab('settings')
-                                                setSettingsOpen(true)
-                                            }}
-                                            className="hover:cursor-pointer"
-                                        >
-                                            <Settings className="mr-3 h-4 w-4" />
-                                            Settings
-                                        </DropdownMenuItem> */}
-                                        <div className="border-t">
-                                            <DropdownMenuItem onClick={() => handleLogout()} className="hover:cursor-pointer">
-                                                <LogOut className="mr-3 h-4 w-4" />
-                                                Log out
+                                            <DropdownMenuItem
+                                                onClick={() => {
+                                                    setActiveSettingsTab('profile')
+                                                    setSettingsOpen(true)
+                                                }}
+                                                className="hover:cursor-pointer"
+                                            >
+                                                <UserIcon className="mr-3 h-4 w-4" />
+                                                Profile
                                             </DropdownMenuItem>
-                                        </div>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
+                                            <DropdownMenuItem
+                                                onClick={() => {
+                                                    setActiveSettingsTab('billing')
+                                                    setSettingsOpen(true)
+                                                }}
+                                                className="hover:cursor-pointer"
+                                            >
+                                                <Clock className="mr-3 h-4 w-4" />
+                                                Plan & Billing
+                                            </DropdownMenuItem>
+                                            <div className="border-t">
+                                                <DropdownMenuItem onClick={() => handleLogout()} className="hover:cursor-pointer">
+                                                    <LogOut className="mr-3 h-4 w-4" />
+                                                    Log out
+                                                </DropdownMenuItem>
+                                            </div>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    {/* Content Area - added padding top for header */}
-                    <div className="pt-14 bg-gray-100">
-                        <div className="max-w-6xl mx-auto px-4 py-8">
+                    {/* Content Area - with top padding for header */}
+                    <div className="pt-16 bg-background min-h-screen">
+                        <div className="px-6 py-8">
                             {children}
                         </div>
                     </div>
                 </div>
             </div>
             <UpgradeModal isOpen={isUpgradeModalOpen} onClose={() => setIsUpgradeModalOpen(false)} />
-            <FeedbackModal isOpen={isFeedbackModalOpen} onClose={() => setIsFeedbackModalOpen(false)} />
             <SettingsModal
                 isOpen={settingsOpen}
                 onClose={() => setSettingsOpen(false)}
