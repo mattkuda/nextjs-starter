@@ -4,7 +4,7 @@
 import localFont from "next/font/local";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from "next-themes"
 
@@ -44,12 +44,11 @@ export default function RootLayout({
           >
             <QueryClientProvider client={queryClient}>
               {children}
-              <Toaster />
+              <Toaster richColors closeButton />
             </QueryClientProvider>
           </ThemeProvider>
         </body>
       </html>
-
     </ClerkProvider>
   );
 }

@@ -8,7 +8,7 @@ import { CREDITS_LIMITS, SubscriptionStatus } from '../../lib/constants'
 // import { CREDITS_LIMITS } from '../../lib/constants'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion'
 import { ZapIcon } from 'lucide-react'
-import { toast } from "@/hooks/use-toast"
+import { toast } from 'sonner'
 
 interface SubscriptionDetailsProps {
     user: User | null
@@ -47,10 +47,8 @@ export function SubscriptionDetails({ user }: SubscriptionDetailsProps) {
                 body: JSON.stringify({ subscriptionId: user?.stripe_subscription_id }),
             });
             setIsCancelModalOpen(false)
-            toast({
-                title: "Subscription cancelled",
+            toast.success("Subscription cancelled", {
                 description: "Your subscription has been cancelled. You will retain access until your current billing period ends.",
-                className: "bg-green-100 border-green-200",
             })
         } catch (error) {
             console.error('Error canceling subscription:', error);

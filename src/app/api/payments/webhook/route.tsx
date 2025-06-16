@@ -13,6 +13,8 @@ const supabase = createClient(
 );
 
 export async function POST(req: NextRequest) {
+    console.log("Webhook received");
+    console.log(req);
     const reqText = await req.text();
     return webhooksHandler(reqText, req);
 }

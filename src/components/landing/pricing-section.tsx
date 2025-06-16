@@ -7,6 +7,8 @@ import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { CheckIcon, ArrowRightIcon } from "lucide-react"
 import { AnimatedSection } from "@/components/ui/animated-section"
+import { useUser } from "@clerk/nextjs"
+import axios from "axios"
 
 interface PricingSectionProps {
     isWaitlistMode?: boolean
@@ -19,6 +21,7 @@ interface PricingSectionProps {
  */
 export function PricingSection({ isWaitlistMode = false }: PricingSectionProps) {
     const [isYearly, setIsYearly] = useState(false)
+    const { user } = useUser()
 
     const scrollToEmail = () => {
         const emailInput = document.querySelector('input[type="email"]') as HTMLInputElement
@@ -28,10 +31,31 @@ export function PricingSection({ isWaitlistMode = false }: PricingSectionProps) 
         }
     }
 
-    const handleGetStarted = (plan: 'starter' | 'pro' | 'max') => {
-        // Navigate to sign up with plan parameter and billing period
-        const billingPeriod = isYearly ? 'yearly' : 'monthly'
-        window.location.href = `/sign-up?plan=${plan}&billing=${billingPeriod}`
+    const handleSubscribe = async (plan: 'starter' | 'pro' | 'max') => {
+        // If user is not logged in, redirect to sign-up with plan parameters
+        if (!user) {
+            const billingPeriod = isYearly ? 'yearly' : 'monthly'
+            window.location.href = `/sign-up?plan=${plan}&billing=${billingPeriod}`
+            return
+        }
+
+        try {
+            const billingPeriod = isYearly ? 'yearly' : 'monthly'
+            const response = await axios.post('/api/upgradePlan', {
+                clerkId: user.id,
+                userId: user.id, // You might need to get the actual user ID from your database
+                email: user.primaryEmailAddress?.emailAddress,
+                plan: plan,
+                billing: billingPeriod,
+            });
+
+            const data = response.data;
+            if (data.url) {
+                window.location.href = data.url; // Redirect to Stripe Checkout
+            }
+        } catch (error) {
+            console.error('Error starting subscription:', error);
+        }
     }
 
     const plans = [
@@ -172,7 +196,7 @@ export function PricingSection({ isWaitlistMode = false }: PricingSectionProps) 
                                     : 'bg-primary hover:bg-primary/90 text-white'
                                     }`}
                                 variant={plan.isPopular ? 'default' : 'default'}
-                                onClick={isWaitlistMode ? scrollToEmail : () => handleGetStarted(plan.id as 'starter' | 'pro' | 'max')}
+                                onClick={isWaitlistMode ? scrollToEmail : () => handleSubscribe(plan.id as 'starter' | 'pro' | 'max')}
                             >
                                 {isWaitlistMode ? 'Join Waitlist' : `Get ${plan.name} Plan`}
                                 <ArrowRightIcon className="ml-2 h-4 w-4" />

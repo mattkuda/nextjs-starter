@@ -18,10 +18,10 @@ import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
 import { SettingsModal } from '../SettingsModal'
 import { useClerk } from "@clerk/nextjs";
-import { toast } from '../../hooks/use-toast'
 import { ThemeToggle } from '../ui/theme-toggle'
 import { Card, CardContent } from '../ui/card'
 import Image from 'next/image'
+import { toast } from "sonner"
 
 interface NavItem {
     label: string
@@ -71,12 +71,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
         if (successParam === 'true') {
             setTimeout(() => {
-                toast({
-                    title: "Welcome to Pro! 🎉",
+                toast.success("Welcome to Pro! 🎉", {
                     description: "You now have access to all premium features.",
                     className: "bg-green-100 border-green-200",
                     duration: 5000,
                 });
+
+                // toast({
+                //     title: "Welcome to Pro! 🎉",
+                //     description: "You now have access to all premium features.",
+                //     className: "bg-green-100 border-green-200",
+                //     duration: 5000,
+                // });
             }, 100); // Small delay for hydration issues
 
             // Remove success param to prevent retriggering

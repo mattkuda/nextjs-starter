@@ -7,10 +7,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import axios from 'axios';
 import { ArrowUp, RotateCcw } from 'lucide-react'
 import { cn } from '../lib/utils'
-import { toast } from "@/hooks/use-toast"
 import ReactMarkdown from 'react-markdown'
 import { CopyButton } from './CopyButton'
 import { motion } from 'framer-motion'
+import { toast } from 'sonner'
 
 interface Message {
     // id: string
@@ -150,11 +150,7 @@ export function AICoach() {
         } catch (error) {
             console.error('Error generating reply:', error)
             setIsError(true)
-            toast({
-                title: "Error",
-                description: "There was an error generating your response. Please try again.",
-                variant: "destructive",
-            })
+            toast.error("There was an error generating your response. Please try again.");
         } finally {
             setIsLoading(false)
         }
