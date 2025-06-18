@@ -45,46 +45,53 @@ export function UserProfile({ user }: UserProfileProps) {
     }
 
     return (
-        <div className="p-6 space-y-4">
-            <h2 className="text-xl font-semibold">Profile Details</h2>
-            <p className="text-sm text-gray-500">These details are used to identify you in threads and better understand the context.</p>
+        <div className="space-y-6">
+            <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">These details are used to identify you in threads and better understand the context.</p>
+            </div>
             <div className="space-y-4">
-                <div>
-                    <label htmlFor="name" className="block text-sm text-gray-700 font-bold">Name</label>
-                    <Input
-                        id="first_name"
-                        value={formData.first_name}
-                        onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label htmlFor="first_name" className="block text-sm font-medium text-foreground mb-2">First Name</label>
+                        <Input
+                            id="first_name"
+                            value={formData.first_name || ''}
+                            onChange={(e) => setFormData(prev => ({ ...prev, first_name: e.target.value }))}
+                            className="bg-background border-input"
+                        />
+                    </div>
+                    <div>
+                        <label htmlFor="last_name" className="block text-sm font-medium text-foreground mb-2">Last Name</label>
+                        <Input
+                            id="last_name"
+                            value={formData.last_name || ''}
+                            onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
+                            className="bg-background border-input"
+                        />
+                    </div>
                 </div>
                 <div>
-                    <label htmlFor="last_name" className="block text-sm text-gray-700 font-bold">Last Name</label>
-                    <Input
-                        id="last_name"
-                        value={formData.last_name}
-                        onChange={(e) => setFormData(prev => ({ ...prev, last_name: e.target.value }))}
-                    />
-                </div>
-                <div>
-                    <label htmlFor="job_title" className="block text-sm text-gray-700 font-bold">Job Title</label>
+                    <label htmlFor="job_title" className="block text-sm font-medium text-foreground mb-2">Job Title</label>
                     <Input
                         id="job_title"
-                        value={formData.job_title}
+                        value={formData.job_title || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, job_title: e.target.value }))}
+                        className="bg-background border-input"
                     />
                 </div>
                 <div>
-                    <label htmlFor="organization_name" className="block text-sm text-gray-700 font-bold">Organization Name</label>
+                    <label htmlFor="organization_name" className="block text-sm font-medium text-foreground mb-2">Organization Name</label>
                     <Input
                         id="organization_name"
-                        value={formData.organization_name}
+                        value={formData.organization_name || ''}
                         onChange={(e) => setFormData(prev => ({ ...prev, organization_name: e.target.value }))}
+                        className="bg-background border-input"
                     />
                 </div>
                 <Button
                     onClick={handleSave}
                     disabled={isSaving}
-                    className="font-bold bg-gradient-to-r from-rose-200 via-pink-200 to-fuchsia-200 text-black hover:opacity-90 disabled:opacity-50"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground"
                 >
                     {isSaving ? (
                         <CircularProgress

@@ -5,7 +5,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { CheckIcon, ArrowRightIcon } from "lucide-react"
+import { CheckIcon, ArrowRightIcon, Rocket, Star, Crown } from "lucide-react"
 import { AnimatedSection } from "@/components/ui/animated-section"
 import { useUser } from "@clerk/nextjs"
 import axios from "axios"
@@ -66,6 +66,7 @@ export function PricingSection({ isWaitlistMode = false }: PricingSectionProps) 
             yearlyPrice: 99.9, // 10 months pricing (2 months free)
             credits: 100,
             description: 'Perfect for individuals getting started with AI-powered workflows.',
+            icon: <Rocket className="h-5 w-5" />,
             features: [
                 'Access to all core features',
                 '100 monthly credits',
@@ -82,6 +83,7 @@ export function PricingSection({ isWaitlistMode = false }: PricingSectionProps) 
             credits: 500,
             description: 'Ideal for professionals and small teams with higher usage needs.',
             isPopular: true,
+            icon: <Star className="h-5 w-5" />,
             features: [
                 'Everything in Starter',
                 '500 monthly credits',
@@ -99,6 +101,7 @@ export function PricingSection({ isWaitlistMode = false }: PricingSectionProps) 
             yearlyPrice: 499.9, // 10 months pricing (2 months free)
             credits: 2000,
             description: 'For power users and teams that need maximum capacity.',
+            icon: <Crown className="h-5 w-5" />,
             features: [
                 'Everything in Pro',
                 '2,000 monthly credits',
@@ -175,7 +178,10 @@ export function PricingSection({ isWaitlistMode = false }: PricingSectionProps) 
                                     MOST POPULAR
                                 </Badge>
                             )}
-                            <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
+                            <div className="flex items-center space-x-2 mb-2">
+                                {plan.icon}
+                                <h3 className="text-2xl font-bold">{plan.name}</h3>
+                            </div>
                             <div className="mb-6">
                                 <span className="text-4xl font-bold">
                                     ${isYearly ? (plan.yearlyPrice / 12).toFixed(2) : plan.monthlyPrice.toFixed(2)}

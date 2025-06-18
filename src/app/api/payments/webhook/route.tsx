@@ -52,35 +52,34 @@ async function handleSubscriptionEvent(
         });
     }
 
-    // Get the plan from our database using the price ID
+    // Store plan info from Stripe metadata or price ID for reference
     const priceId = subscription.items.data[0].price.id;
-    const { data: plan, error: planError } = await supabase
-        .from("plans")
-        .select("id")
-        .eq("stripe_price_id", priceId)
-        .single();
-
-    if (planError || !plan) {
-        console.error("Error fetching plan:", planError);
-        return NextResponse.json({
-            status: 500,
-            error: "Plan not found",
-        });
-    }
+    console.log("Processing subscription for price ID:", priceId);
 
     if (type === "created" || type === "updated") {
         // Update or create subscription
-        const { error: subError } = await supabase
+        const { data: subData, error: subError } = await supabase
             .from("subscriptions")
             .upsert({
                 user_id: user.id,
-                plan_id: plan.id,
                 stripe_subscription_id: subscription.id,
-                start_date: new Date(subscription.current_period_start * 1000),
-                end_date: new Date(subscription.current_period_end * 1000),
-                is_active: subscription.status === "active",
+                start_date: new Date(subscription.current_period_start * 1000).toISOString().split('T')[0],
+                end_date: new Date(subscription.current_period_end * 1000).toISOString().split('T')[0],
+                is_active: ['active', 'trialing'].includes(subscription.status), // Include trialing status
                 cancel_at_period_end: subscription.cancel_at_period_end,
-            });
+            }, {
+                onConflict: 'stripe_subscription_id'
+            })
+            .select()
+            .single();
+
+        // Also update the user table with the subscription ID for easier lookups
+        if (subData && !subError) {
+            await supabase
+                .from("users")
+                .update({ stripe_subscription_id: subscription.id })
+                .eq("id", user.id);
+        }
 
         if (subError) {
             console.error("Error updating subscription:", subError);
@@ -91,14 +90,22 @@ async function handleSubscriptionEvent(
         }
 
         // Initialize credit usage window for new subscriptions
-        if (type === "created") {
+        if (type === "created" && subData) {
+            const startDate = new Date(subscription.current_period_start * 1000);
+            const endDate = new Date(subscription.current_period_end * 1000);
+
+            // Ensure end date is after start date to satisfy database constraint
+            if (endDate <= startDate) {
+                endDate.setDate(startDate.getDate() + 1);
+            }
+
             const { error: creditError } = await supabase
                 .from("credit_usage")
                 .insert({
                     user_id: user.id,
-                    subscription_id: subscription.id,
-                    usage_window_start: new Date(subscription.current_period_start * 1000),
-                    usage_window_end: new Date(subscription.current_period_end * 1000),
+                    subscription_id: subData.id, // Use the database subscription ID, not Stripe ID
+                    usage_window_start: startDate.toISOString().split('T')[0],
+                    usage_window_end: endDate.toISOString().split('T')[0],
                     credits_used: 0,
                 });
 
@@ -111,12 +118,12 @@ async function handleSubscriptionEvent(
             }
         }
     } else if (type === "deleted") {
-        // Mark subscription as inactive
+        // Mark subscription as inactive and clear user's subscription ID
         const { error: subError } = await supabase
             .from("subscriptions")
             .update({
                 is_active: false,
-                end_date: new Date(),
+                end_date: new Date().toISOString().split('T')[0],
             })
             .eq("stripe_subscription_id", subscription.id);
 
@@ -127,6 +134,12 @@ async function handleSubscriptionEvent(
                 error: "Error deactivating subscription",
             });
         }
+
+        // Clear subscription ID from user table
+        await supabase
+            .from("users")
+            .update({ stripe_subscription_id: null })
+            .eq("id", user.id);
     }
 
     return NextResponse.json({
@@ -166,14 +179,37 @@ async function handleInvoiceEvent(event: Stripe.Event, status: "succeeded" | "fa
     }
 
     if (status === "succeeded") {
+        // Get the subscription from our database using the Stripe subscription ID
+        const { data: subscription, error: subError } = await supabase
+            .from("subscriptions")
+            .select("id")
+            .eq("stripe_subscription_id", invoice.subscription as string)
+            .single();
+
+        if (subError || !subscription) {
+            console.error("Error fetching subscription:", subError);
+            return NextResponse.json({
+                status: 500,
+                error: "Subscription not found",
+            });
+        }
+
         // Reset credit usage for the new billing period
+        const startDate = new Date(invoice.period_start * 1000);
+        const endDate = new Date(invoice.period_end * 1000);
+
+        // Ensure end date is after start date to satisfy database constraint
+        if (endDate <= startDate) {
+            endDate.setDate(startDate.getDate() + 1);
+        }
+
         const { error: creditError } = await supabase
             .from("credit_usage")
             .insert({
                 user_id: user.id,
-                subscription_id: invoice.subscription,
-                usage_window_start: new Date(invoice.period_start * 1000),
-                usage_window_end: new Date(invoice.period_end * 1000),
+                subscription_id: subscription.id, // Use the database subscription ID
+                usage_window_start: startDate.toISOString().split('T')[0],
+                usage_window_end: endDate.toISOString().split('T')[0],
                 credits_used: 0,
             });
 

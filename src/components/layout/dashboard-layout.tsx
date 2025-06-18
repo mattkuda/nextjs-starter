@@ -10,16 +10,14 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { Home, MessageCircle, Settings, User as UserIcon, LogOut, ChevronDown, Clock, ZapIcon, Crown } from 'lucide-react'
+import { Home, MessageCircle, Settings, User as UserIcon, LogOut, ChevronDown, Clock, Map, Camera } from 'lucide-react'
 import { UpgradeModal } from '../UpgradeModal'
-import { SubscriptionStatus } from '../../lib/constants'
 import { User } from "@/types"
 import { useQuery } from '@tanstack/react-query'
 import axios from 'axios'
-import { SettingsModal } from '../SettingsModal'
 import { useClerk } from "@clerk/nextjs";
 import { ThemeToggle } from '../ui/theme-toggle'
-import { Card, CardContent } from '../ui/card'
+import { PlanStatusCard } from './plan-status-card'
 import Image from 'next/image'
 import { toast } from "sonner"
 
@@ -28,11 +26,12 @@ interface NavItem {
     href: string
     icon: React.ElementType
 }
-
 const navItems: NavItem[] = [
-    { label: 'Dashboard', href: '/dashboard', icon: Home },
     { label: 'AI Chat', href: '/dashboard/ai-chat', icon: MessageCircle },
+    { label: 'Project Planner', href: '/dashboard/project-planner', icon: Map, },
+    { label: 'Image Generator', href: '/dashboard/image-generator', icon: Camera },
 ]
+
 
 interface DashboardLayoutProps {
     children: ReactNode
@@ -41,8 +40,6 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
     const pathname = usePathname()
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-    const [settingsOpen, setSettingsOpen] = useState(false)
-    const [activeSettingsTab, setActiveSettingsTab] = useState<'profile' | 'billing' | 'settings'>('profile')
     const { data: userData, isLoading } = useQuery({
         queryKey: ['user'],
         queryFn: async () => {
@@ -77,13 +74,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     duration: 5000,
                 });
 
-                // toast({
-                //     title: "Welcome to Pro! 🎉",
-                //     description: "You now have access to all premium features.",
-                //     className: "bg-green-100 border-green-200",
-                //     duration: 5000,
-                // });
-            }, 100); // Small delay for hydration issues
+            }, 100);
 
             // Remove success param to prevent retriggering
             const newUrl = window.location.pathname;
@@ -99,9 +90,24 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 {/* Fixed Sidebar */}
                 <nav className="w-64 bg-card border-r min-h-screen fixed left-0 flex flex-col pt-16 z-10">
                     <div className="flex-1">
-                        <div className="px-4 py-2 text-sm font-medium text-muted-foreground uppercase tracking-wider">
-                            Main
-                        </div>
+                        {/* Dashboard - Primary Navigation */}
+                        <ul className="py-2 space-y-1">
+                            <li>
+                                <Link
+                                    href="/dashboard"
+                                    className={`flex items-center px-4 py-2.5 mx-2 text-foreground hover:bg-accent rounded-lg transition-colors ${pathname === '/dashboard' ? 'bg-primary/10 text-primary border border-primary/20' : ''
+                                        }`}
+                                >
+                                    <Home className="h-5 w-5 mr-3" />
+                                    Dashboard
+                                </Link>
+                            </li>
+                        </ul>
+
+                        {/* Separator */}
+                        <div className="border-b border-border mx-4 my-2"></div>
+
+                        {/* Feature Navigation */}
                         <ul className="py-2 space-y-1">
                             {navItems.map((item) => (
                                 <li key={item.href}>
@@ -118,48 +124,26 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         </ul>
                     </div>
                     {/* Theme Toggle */}
-                    <div className="px-2">
+                    <div className="px-4 pb-2">
                         <ThemeToggle />
                     </div>
                     <div className="mt-auto p-4 space-y-4">
                         {/* Plan Status */}
-                        <Card className="bg-muted/30">
-                            <CardContent className="p-3">
-                                <div className="flex items-center gap-2">
-                                    {userData?.subscription_status === SubscriptionStatus.PRO ? (
-                                        <>
-                                            <Crown className="h-4 w-4 text-primary" />
-                                            <div>
-                                                <p className="text-sm font-medium">Pro Plan</p>
-                                                <p className="text-xs text-muted-foreground">All features unlocked</p>
-                                            </div>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <ZapIcon className="h-4 w-4 text-muted-foreground" />
-                                            <div>
-                                                <p className="text-sm font-medium">Free Plan</p>
-                                                <p className="text-xs text-muted-foreground">Limited features</p>
-                                            </div>
-                                        </>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
-
+                        <PlanStatusCard
+                            subscriptionStatus={userData?.subscription_status}
+                            onUpgradeClick={() => setIsUpgradeModalOpen(true)}
+                            isLoading={isLoading}
+                        />
 
                         {/* Settings */}
-                        <Button
-                            variant="ghost"
-                            className="w-full justify-start px-2"
-                            onClick={() => {
-                                setActiveSettingsTab('profile')
-                                setSettingsOpen(true)
-                            }}
+                        <Link
+                            href="/dashboard/settings"
+                            className={`flex items-center px-2 py-2.5 text-foreground hover:bg-accent rounded-lg transition-colors ${pathname === '/dashboard/settings' ? 'bg-primary/10 text-primary border border-primary/20' : ''
+                                }`}
                         >
                             <Settings className="h-4 w-4 mr-3" />
                             Settings
-                        </Button>
+                        </Link>
                     </div>
                 </nav>
 
@@ -178,14 +162,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                             {/* Right section */}
                             <div className="flex-1 px-4 py-3 flex justify-end items-center">
                                 <div className="flex items-center gap-2">
-                                    {isLoading ? (
-                                        <div className="h-9 w-24 animate-pulse bg-muted rounded" />
-                                    ) : userData?.subscription_status !== SubscriptionStatus.PRO ? (
-                                        <Button onClick={() => setIsUpgradeModalOpen(true)}>
-                                            <ZapIcon className="h-4 w-4 mr-2" />
-                                            Upgrade to Pro
-                                        </Button>
-                                    ) : null}
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <Button
@@ -212,25 +188,17 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                                                     <span className="text-sm text-muted-foreground">{userData?.email}</span>
                                                 </div>
                                             </div>
-                                            <DropdownMenuItem
-                                                onClick={() => {
-                                                    setActiveSettingsTab('profile')
-                                                    setSettingsOpen(true)
-                                                }}
-                                                className="hover:cursor-pointer"
-                                            >
-                                                <UserIcon className="mr-3 h-4 w-4" />
-                                                Profile
+                                            <DropdownMenuItem asChild>
+                                                <Link href="/dashboard/settings" className="hover:cursor-pointer">
+                                                    <UserIcon className="mr-3 h-4 w-4" />
+                                                    Profile
+                                                </Link>
                                             </DropdownMenuItem>
-                                            <DropdownMenuItem
-                                                onClick={() => {
-                                                    setActiveSettingsTab('billing')
-                                                    setSettingsOpen(true)
-                                                }}
-                                                className="hover:cursor-pointer"
-                                            >
-                                                <Clock className="mr-3 h-4 w-4" />
-                                                Plan & Billing
+                                            <DropdownMenuItem asChild>
+                                                <Link href="/dashboard/settings?tab=billing" className="hover:cursor-pointer">
+                                                    <Clock className="mr-3 h-4 w-4" />
+                                                    Plan & Billing
+                                                </Link>
                                             </DropdownMenuItem>
                                             <div className="border-t">
                                                 <DropdownMenuItem onClick={() => handleLogout()} className="hover:cursor-pointer">
@@ -253,11 +221,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 </div>
             </div>
             <UpgradeModal isOpen={isUpgradeModalOpen} onClose={() => setIsUpgradeModalOpen(false)} />
-            <SettingsModal
-                isOpen={settingsOpen}
-                onClose={() => setSettingsOpen(false)}
-                defaultTab={activeSettingsTab}
-            />
         </>
     )
 }

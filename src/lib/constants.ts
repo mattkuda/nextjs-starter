@@ -1,12 +1,16 @@
 export enum SubscriptionStatus {
     FREE = 'free',
+    STARTER = 'starter',
     PRO = 'pro',
+    MAX = 'max',
     CANCELED = 'canceled'
 }
 
 export const CREDITS_LIMITS = {
-    [SubscriptionStatus.FREE]: 100,
-    [SubscriptionStatus.PRO]: 1000,
+    [SubscriptionStatus.FREE]: 5,
+    [SubscriptionStatus.STARTER]: 100,
+    [SubscriptionStatus.PRO]: 500,
+    [SubscriptionStatus.MAX]: 2000,
     [SubscriptionStatus.CANCELED]: 0,
 } as const
 

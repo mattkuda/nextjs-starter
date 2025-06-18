@@ -10,22 +10,11 @@ create table users (
   modified_at timestamp with time zone default now()
 );
 
--- Plans available for subscription
-create table plans (
-  id uuid primary key default gen_random_uuid(),
-  name text not null,
-  price_cents integer not null,
-  credit_limit integer not null,
-  billing_interval text check (billing_interval in ('monthly', 'yearly')),
-  is_active boolean default true,
-  created_at timestamp with time zone default now()
-);
-
 -- Subscription records (1 active per user at a time)
+-- Note: Plan details are stored in frontend component, not database
 create table subscriptions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) on delete cascade,
-  plan_id uuid references plans(id),
   stripe_subscription_id text unique,
   start_date date not null,
   end_date date not null,
@@ -66,9 +55,7 @@ create table credit_usage_log (
 -- Indexes for performance
 create index idx_users_email on users(email);
 create index idx_users_stripe_sub on users(stripe_subscription_id);
-create index idx_plans_active on plans(is_active);
 create index idx_subscriptions_user on subscriptions(user_id);
-create index idx_subscriptions_plan on subscriptions(plan_id);
 create index idx_subscriptions_stripe on subscriptions(stripe_subscription_id);
 create index idx_subscriptions_dates on subscriptions(start_date, end_date);
 create index idx_credit_usage_user on credit_usage(user_id);
@@ -95,7 +82,6 @@ create trigger update_users_modified_at
 
 -- Enable Row Level Security (RLS)
 alter table users enable row level security;
-alter table plans enable row level security;
 alter table subscriptions enable row level security;
 alter table credit_usage enable row level security;
 alter table credit_usage_log enable row level security;
@@ -103,11 +89,6 @@ alter table credit_usage_log enable row level security;
 -- Block all access by default
 create policy "Block all access"
   on users
-  for all
-  using (false);
-
-create policy "Block all access"
-  on plans
   for all
   using (false);
 

@@ -21,8 +21,9 @@ export function ThemeToggle() {
 
     if (!mounted) {
         return (
-            <Button variant="ghost" size="sm" disabled>
-                <Sun className="h-4 w-4" />
+            <Button variant="ghost" className="w-full justify-start px-2 py-2.5 h-auto" disabled>
+                <Sun className="h-4 w-4 mr-3" />
+                <span>Light</span>
             </Button>
         )
     }
@@ -52,9 +53,11 @@ export function ThemeToggle() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="sm" className="w-full justify-start">
-                    {getThemeIcon()}
-                    <span className="ml-2">{getThemeLabel()}</span>
+                <Button variant="ghost" className="w-full justify-start px-2 py-2.5 h-auto text-foreground hover:bg-accent rounded-lg transition-colors">
+                    <span className="flex items-center">
+                        {getThemeIcon()}
+                        <span className="ml-3">{getThemeLabel()}</span>
+                    </span>
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-36">
