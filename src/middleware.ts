@@ -11,6 +11,7 @@ const publicRoutes = [
     "/sign-in(.*)",
     "/sign-up(.*)",
     "/get-started(.*)",
+    "/onboarding(.*)",
 ];
 
 const isPublicRoute = createRouteMatcher(publicRoutes);

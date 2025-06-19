@@ -119,11 +119,9 @@ export function Dashboard() {
                     </CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Button asChild>
-                        <Link href="/dashboard/ai-chat">
-                            Get Started with AI Chat
-                            <MessageCircle className="h-4 w-4 ml-2" />
-                        </Link>
+                    <Button onClick={() => window.location.href = '/dashboard/ai-chat'}>
+                        Get Started with AI Chat
+                        <MessageCircle className="h-4 w-4 ml-2" />
                     </Button>
                 </CardContent>
             </Card>

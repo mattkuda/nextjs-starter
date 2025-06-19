@@ -1,7 +1,7 @@
 'use client'
 
 import { Card, CardContent } from "@/components/ui/card"
-import { Crown, ZapIcon, Rocket, ArrowUpRight, Star } from "lucide-react"
+import { Crown, ZapIcon, ArrowUpRight, Zap, Sparkle } from "lucide-react"
 import { SubscriptionStatus } from "@/lib/constants"
 
 interface PlanStatusCardProps {
@@ -17,7 +17,7 @@ export function PlanStatusCard({ subscriptionStatus, isClickable = true, onUpgra
         switch (subscriptionStatus) {
             case SubscriptionStatus.STARTER:
                 return {
-                    icon: Rocket,
+                    icon: Sparkle,
                     name: 'Starter Plan',
                     description: '100 monthly credits',
                     color: 'text-blue-500',
@@ -25,7 +25,7 @@ export function PlanStatusCard({ subscriptionStatus, isClickable = true, onUpgra
                 }
             case SubscriptionStatus.PRO:
                 return {
-                    icon: Star,
+                    icon: Zap,
                     name: 'Pro Plan',
                     description: '500 monthly credits',
                     color: 'text-purple-500',

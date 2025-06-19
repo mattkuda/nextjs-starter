@@ -20,6 +20,7 @@ import { ThemeToggle } from '../ui/theme-toggle'
 import { PlanStatusCard } from './plan-status-card'
 import Image from 'next/image'
 import { toast } from "sonner"
+import { SubscriptionStatus } from '@/lib/constants'
 
 interface NavItem {
     label: string
@@ -39,7 +40,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
     const pathname = usePathname()
     const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-    const { data: userData, isLoading } = useQuery({
+    const { data: userData, isLoading, refetch } = useQuery({
         queryKey: ['user'],
         queryFn: async () => {
             const { data } = await axios.get<User>('/api/user')
@@ -78,8 +79,45 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             // Remove success param to prevent retriggering
             const newUrl = window.location.pathname;
             window.history.replaceState({}, '', newUrl);
+
+            // Poll for updated subscription status after successful payment
+            const pollForUpdate = async () => {
+                let attempts = 0;
+                const maxAttempts = 10; // Poll for up to 30 seconds
+
+                const poll = async () => {
+                    attempts++;
+                    await refetch();
+
+                    if (attempts < maxAttempts) {
+                        setTimeout(poll, 3000); // Poll every 3 seconds
+                    }
+                };
+
+                setTimeout(poll, 2000); // Start polling after 2 seconds
+            };
+
+            pollForUpdate();
         }
-    }, []);
+    }, [refetch]);
+
+    // Silent redirect to onboarding if user has no active subscription
+    // BUT skip redirect if coming from successful payment (success=true param)
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        const params = new URLSearchParams(window.location.search);
+        const successParam = params.get('success');
+
+        // Don't redirect if payment was just successful - give webhook time to process
+        if (successParam === 'true') {
+            return;
+        }
+
+        if (!isLoading && userData && userData.subscription_status === SubscriptionStatus.FREE) {
+            window.location.href = '/onboarding'
+        }
+    }, [isLoading, userData])
 
     const initials = userData?.first_name && userData?.last_name ? userData?.first_name?.charAt(0).toUpperCase() + userData?.last_name?.charAt(0).toUpperCase() : userData?.email?.charAt(0).toUpperCase()
 
