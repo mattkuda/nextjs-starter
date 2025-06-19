@@ -32,7 +32,6 @@ const navItems: NavItem[] = [
     { label: 'Image Generator', href: '/dashboard/image-generator', icon: Camera },
 ]
 
-
 interface DashboardLayoutProps {
     children: ReactNode
 }
@@ -88,7 +87,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <>
             <div className="min-h-screen flex bg-background">
                 {/* Fixed Sidebar */}
-                <nav className="w-64 bg-card border-r min-h-screen fixed left-0 flex flex-col pt-16 z-10">
+                <nav className="w-64 bg-card border-r min-h-screen fixed left-0 flex flex-col pt-[calc(4rem-4px)] z-10">
                     <div className="flex-1">
                         {/* Dashboard - Primary Navigation */}
                         <ul className="py-2 space-y-1">
@@ -105,7 +104,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                         </ul>
 
                         {/* Separator */}
-                        <div className="border-b border-border mx-4 my-2"></div>
+                        <div className="border-b border-border mx-4 my-0"></div>
 
                         {/* Feature Navigation */}
                         <ul className="py-2 space-y-1">
@@ -150,9 +149,9 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                 {/* Main Content Area */}
                 <div className="flex-1 ml-64 bg-background">
                     {/* Top Header - clean white background */}
-                    <div className="fixed top-0 left-0 right-0 z-20 bg-background border-b">
+                    <div className="fixed top-0 left-0 right-0 z-20 bg-background">
                         <div className="flex">
-                            {/* Logo section with border */}
+                            {/* Logo section - unified with sidebar */}
                             <div className="w-64 bg-card border-r px-4 py-3 flex items-center">
                                 <div className="text-xl font-bold text-foreground flex items-center">
                                     <Image src="/icon.png" alt="Logo" width={32} height={32} className="mr-2" />
@@ -160,7 +159,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                                 </div>
                             </div>
                             {/* Right section */}
-                            <div className="flex-1 px-4 py-3 flex justify-end items-center">
+                            <div className="flex-1 px-4 py-3 flex justify-end items-center border-b">
                                 <div className="flex items-center gap-2">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
