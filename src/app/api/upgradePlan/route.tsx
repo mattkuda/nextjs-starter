@@ -20,11 +20,7 @@ const stripe = new Stripe(stripeSecretKey as string, {
 export async function POST(req: NextRequest) {
     try {
         const { clerkId, userId, email, plan, billing } = await req.json();
-        console.log('clerkId', clerkId);
-        console.log('userId', userId);
-        console.log('email', email);
-        console.log('plan', plan);
-        console.log('billing', billing);
+
         if (!email) {
             return NextResponse.json(
                 { error: 'Email is required' },
