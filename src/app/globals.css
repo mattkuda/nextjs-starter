@@ -89,6 +89,11 @@ body {
   body {
     @apply bg-background text-foreground;
   }
+
+  /* Add scroll padding to account for sticky header */
+  html {
+    scroll-padding-top: 80px;
+  }
 }
 
 @keyframes fadeIn {

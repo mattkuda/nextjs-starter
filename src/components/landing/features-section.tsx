@@ -56,13 +56,13 @@ export function FeaturesSection() {
     }
 
     return (
-        <AnimatedSection id="features" className="py-16 md:py-24 bg-white">
+        <AnimatedSection id="features" className="py-16 md:py-24 bg-background">
             <div className="container px-4 md:px-6 mx-auto">
                 <div className="text-center mb-16">
                     <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
                         Features
                     </Badge>
-                    <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl max-w-3xl mx-auto text-gray-900">
+                    <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl max-w-3xl mx-auto text-foreground">
                         Everything you need to build modern web applications
                     </h2>
                     <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -82,7 +82,7 @@ export function FeaturesSection() {
                             <div className="mx-auto mb-4 h-12 w-12 bg-primary/10 rounded-lg flex items-center justify-center">
                                 <feature.icon className="h-6 w-6 text-primary" />
                             </div>
-                            <h3 className="text-lg font-semibold mb-2 text-gray-900">{feature.title}</h3>
+                            <h3 className="text-lg font-semibold mb-2 text-foreground">{feature.title}</h3>
                             <p className="text-muted-foreground text-sm">
                                 {feature.description}
                             </p>

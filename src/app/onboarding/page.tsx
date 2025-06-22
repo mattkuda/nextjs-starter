@@ -57,12 +57,11 @@ export default function OnboardingPage() {
                         {/* Hero Text */}
                         <div className="opacity-0 animate-fade-in [animation-delay:200ms] [animation-fill-mode:forwards]">
                             <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-                                Your AI Companion To
-                                <br />
-                                Help You <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Code Anything</span>
+                                Stop coding boilerplate.<br />
+                                Start <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Selling Subscriptions</span>
                             </h1>
                             <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
-                                Unlock the full power of AI-driven workflows. Select the plan that best fits your needs and start creating amazing content today.
+                                The only Next.js starter you need. Auth, payments, database, and AI included. Launch your startup this weekend.
                             </p>
                         </div>
                     </div>

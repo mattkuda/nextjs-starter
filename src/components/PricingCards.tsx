@@ -137,8 +137,8 @@ export function PricingCards({ isWaitlistMode = false }: PricingCardsProps) {
                             <CardFooter>
                                 <Button
                                     className={`w-full ${plan.isPopular
-                                            ? 'bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white'
-                                            : 'bg-primary hover:bg-primary/90 text-white'
+                                        ? 'bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white'
+                                        : 'bg-primary hover:bg-primary/90 text-white'
                                         }`}
                                     onClick={isWaitlistMode ? scrollToEmail : () => handleSubscribe(plan.id)}
                                 >

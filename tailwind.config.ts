@@ -28,24 +28,6 @@ export default {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))'
 				},
-				brand1: {
-					'100': '#fff0e6',
-					'200': '#ffe1cc',
-					'500': '#ffad66',
-					DEFAULT: '#ffad66'
-				},
-				brand2: {
-					'100': '#ffe0ee',
-					'200': '#ffc1dd',
-					'500': '#ff63b2',
-					DEFAULT: '#ff63b2'
-				},
-				brand3: {
-					'100': '#eee0ff',
-					'200': '#ddbeff',
-					'500': '#ad5cff',
-					DEFAULT: '#ad5cff'
-				},
 				muted: {
 					DEFAULT: 'hsl(var(--muted))',
 					foreground: 'hsl(var(--muted-foreground))'

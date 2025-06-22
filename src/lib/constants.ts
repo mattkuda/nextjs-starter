@@ -91,22 +91,22 @@ export interface Testimonial {
 
 export const TESTIMONIALS: Testimonial[] = [
     {
-        name: "Peter",
-        role: "QA Engineer",
-        message: "Finally, an AI tool that actually understands the context of the conversation! This is exactly what we've been waiting for.",
-        imageUrl: "/peter.png"
+        name: "Jesse",
+        role: "Web Developer",
+        message: "Finally, a boilerplate that actually works. I'm able to get shipping the sauced in seconds.",
+        imageUrl: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
         name: "Jill",
-        role: "Private Consultant",
-        message: "Saves me hours of time reading through Slack threads each week. I'm able to get the information I need in seconds.",
-        imageUrl: "/jill.png"
+        role: "Staff Software Engineer",
+        message: "Saves me hours of time setting up my SaaS. Works great with Cursor to get my product to market.",
+        imageUrl: "https://images.unsplash.com/photo-1701615004837-40d8573b6652?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
         name: "Erik",
-        role: "Product Manager",
+        role: "AI Content Creator",
         message: "I can't image life without NextJS Starter. It's a game-changer for my team.",
-        imageUrl: "/erik.png"
+        imageUrl: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     }
 ];
 

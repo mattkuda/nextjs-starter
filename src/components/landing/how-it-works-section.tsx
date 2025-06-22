@@ -28,13 +28,13 @@ export function HowItWorksSection() {
     ]
 
     return (
-        <AnimatedSection id="how-it-works" className="py-16 md:py-24 bg-gray-50">
+        <AnimatedSection id="how-it-works" className="py-16 md:py-24">
             <div className="container px-4 md:px-6 mx-auto">
                 <div className="text-center mb-16">
                     <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
                         How it works
                     </Badge>
-                    <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-gray-900">
+                    <h2 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl text-foreground">
                         From idea to deployed app in 3 simple steps
                     </h2>
                     <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -51,13 +51,13 @@ export function HowItWorksSection() {
                             viewport={{ once: true, margin: "-100px" }}
                             transition={{ duration: 0.6, delay: index * 0.1 }}
                         >
-                            <div className="mx-auto mb-6 h-48 w-80 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg flex items-center justify-center">
+                            <div className="mx-auto mb-6 h-48 w-80 bg-gradient-to-br from-muted/50 to-muted rounded-lg flex items-center justify-center">
                                 <step.icon className="h-16 w-16 text-primary" />
                             </div>
                             <Badge className="mb-4 bg-primary/10 text-primary border-primary/20">
                                 {step.step}
                             </Badge>
-                            <h3 className="text-xl font-semibold mb-4 text-gray-900">{step.title}</h3>
+                            <h3 className="text-xl font-semibold mb-4 text-foreground">{step.title}</h3>
                             <p className="text-muted-foreground">
                                 {step.description}
                             </p>

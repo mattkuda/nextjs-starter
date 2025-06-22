@@ -1,5 +1,7 @@
 "use client"
 
+import Image from 'next/image'
+
 const tweets = [
     {
         url: 'https://x.com/MattKuda/status/1931450482859422037',
@@ -86,17 +88,19 @@ const tweets = [
 function TweetCard({ tweet }: { tweet: typeof tweets[0] }) {
     return (
         <div className="flex-shrink-0" style={{ width: '300px', height: '250px' }}>
-            <div className="bg-white rounded-xl p-6 h-full flex flex-col border border-gray-200 hover:border-gray-300 transition-colors">
+            <div className="bg-card rounded-xl p-6 h-full flex flex-col border border-border hover:border-border/80 transition-colors">
                 {/* Header */}
                 <div className="flex items-center gap-3 mb-4">
-                    <img
+                    <Image
                         src={tweet.author.avatar}
                         alt={tweet.author.name}
+                        width={48}
+                        height={48}
                         className="w-12 h-12 rounded-full object-cover flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                            <span className="font-bold text-gray-900 text-[15px] truncate">
+                            <span className="font-bold text-foreground text-[15px] truncate">
                                 {tweet.author.name}
                             </span>
                             {tweet.author.verified && (
@@ -105,7 +109,7 @@ function TweetCard({ tweet }: { tweet: typeof tweets[0] }) {
                                 </svg>
                             )}
                         </div>
-                        <div className="text-gray-500 text-[15px] truncate">
+                        <div className="text-muted-foreground text-[15px] truncate">
                             {tweet.author.handle}
                         </div>
                     </div>
@@ -113,10 +117,10 @@ function TweetCard({ tweet }: { tweet: typeof tweets[0] }) {
                         href={tweet.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex-shrink-0 hover:bg-gray-100 rounded-full p-2 transition-all duration-200 cursor-pointer z-20 relative"
+                        className="flex-shrink-0 hover:bg-accent rounded-full p-2 transition-all duration-200 cursor-pointer z-20 relative"
                         title="View tweet"
                     >
-                        <svg className="w-5 h-5 text-gray-400 hover:text-blue-500" viewBox="0 0 24 24" fill="currentColor">
+                        <svg className="w-5 h-5 text-muted-foreground hover:text-blue-500" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                         </svg>
                     </a>
@@ -124,7 +128,7 @@ function TweetCard({ tweet }: { tweet: typeof tweets[0] }) {
 
                 {/* Content */}
                 <div className="flex-1">
-                    <p className="text-gray-900 text-[15px] leading-relaxed whitespace-pre-wrap">
+                    <p className="text-foreground text-[15px] leading-relaxed whitespace-pre-wrap">
                         {tweet.content}
                     </p>
                 </div>
@@ -135,13 +139,13 @@ function TweetCard({ tweet }: { tweet: typeof tweets[0] }) {
 
 export function TweetsSection() {
     return (
-        <section className="py-24 bg-white">
+        <section className="py-24 bg-background">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
                 <div className="text-center">
-                    <h2 className="text-4xl font-bold text-gray-900 mb-4">
+                    <h2 className="text-4xl font-bold text-foreground mb-4">
                         What People Are Saying
                     </h2>
-                    <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                    <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
                         Join thousands of satisfied users who have transformed their workflow.
                     </p>
                 </div>
@@ -175,9 +179,9 @@ export function TweetsSection() {
                 </div>
 
                 {/* Gradient overlays */}
-                <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-white via-white/80 to-transparent pointer-events-none z-10" />
-                <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-white via-white/80 to-transparent pointer-events-none z-10" />
+                <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-background via-background/80 to-transparent pointer-events-none z-10" />
+                <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-background via-background/80 to-transparent pointer-events-none z-10" />
             </div>
         </section>
     )
-} 
+}
