@@ -1,6 +1,7 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import Stripe from "stripe";
+import { getPlanFromPriceId } from "@/lib/utils";
 
 const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -23,129 +24,171 @@ async function handleSubscriptionEvent(
     event: Stripe.Event,
     type: "created" | "updated" | "deleted"
 ) {
+    console.log(`Processing subscription ${type} event:`, event.id);
     const subscription = event.data.object as Stripe.Subscription;
     const customerId = subscription.customer as string;
 
-    // Get the customer to find the user
-    const customer = await stripe.customers.retrieve(customerId);
-    const userEmail = (customer as Stripe.Customer).email;
+    try {
+        // Get the customer to find the user
+        const customer = await stripe.customers.retrieve(customerId);
+        const userEmail = (customer as Stripe.Customer).email;
 
-    if (!userEmail) {
-        return NextResponse.json({
-            status: 500,
-            error: "Customer email could not be fetched",
-        });
-    }
+        if (!userEmail) {
+            console.error("Customer email could not be fetched for customer:", customerId);
+            return NextResponse.json({
+                status: 500,
+                error: "Customer email could not be fetched",
+            });
+        }
 
-    // Get the user from our database
-    const { data: user, error: userError } = await supabase
-        .from("users")
-        .select("id")
-        .eq("email", userEmail)
-        .single();
+        console.log(`Processing subscription ${type} for user email:`, userEmail);
 
-    if (userError || !user) {
-        console.error("Error fetching user:", userError);
-        return NextResponse.json({
-            status: 500,
-            error: "User not found",
-        });
-    }
+        // Get the user from our database with retry logic for new users
+        let user;
+        let userError;
+        let retryCount = 0;
+        const maxRetries = 3;
 
-    // Store plan info from Stripe metadata or price ID for reference
-    const priceId = subscription.items.data[0].price.id;
-    console.log("Processing subscription for price ID:", priceId);
+        do {
+            const result = await supabase
+                .from("users")
+                .select("id")
+                .eq("email", userEmail)
+                .single();
 
-    if (type === "created" || type === "updated") {
-        // Update or create subscription
-        const { data: subData, error: subError } = await supabase
-            .from("subscriptions")
-            .upsert({
-                user_id: user.id,
-                stripe_subscription_id: subscription.id,
-                start_date: new Date(subscription.current_period_start * 1000).toISOString().split('T')[0],
-                end_date: new Date(subscription.current_period_end * 1000).toISOString().split('T')[0],
-                is_active: ['active', 'trialing'].includes(subscription.status), // Include trialing status
-                cancel_at_period_end: subscription.cancel_at_period_end,
-            }, {
-                onConflict: 'stripe_subscription_id'
-            })
-            .select()
-            .single();
+            user = result.data;
+            userError = result.error;
 
-        // Also update the user table with the subscription ID for easier lookups
-        if (subData && !subError) {
+            if (userError && retryCount < maxRetries) {
+                console.log(`User not found, retry ${retryCount + 1}/${maxRetries} for email:`, userEmail);
+                await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
+                retryCount++;
+            }
+        } while (userError && retryCount < maxRetries);
+
+        if (userError || !user) {
+            console.error("Error fetching user after retries:", userError, "Email:", userEmail);
+            return NextResponse.json({
+                status: 500,
+                error: "User not found after retries",
+            });
+        }
+
+        console.log(`Found user ${user.id} for subscription ${type}`);
+
+        // Store plan info from Stripe metadata or price ID for reference
+        const priceId = subscription.items.data[0].price.id;
+        console.log("Processing subscription for price ID:", priceId);
+
+        // Get tier and billing cycle from price ID
+        const planInfo = getPlanFromPriceId(priceId);
+        if (!planInfo) {
+            console.error("Unknown price ID:", priceId);
+            return NextResponse.json({
+                status: 500,
+                error: "Unknown price ID",
+            });
+        }
+
+        if (type === "created" || type === "updated") {
+            // Update or create subscription
+            const { data: subData, error: subError } = await supabase
+                .from("subscriptions")
+                .upsert({
+                    user_id: user.id,
+                    stripe_subscription_id: subscription.id,
+                    tier: planInfo.tier,
+                    billing_cycle: planInfo.billing_cycle,
+                    start_date: new Date(subscription.current_period_start * 1000).toISOString().split('T')[0],
+                    end_date: new Date(subscription.current_period_end * 1000).toISOString().split('T')[0],
+                    is_active: ['active', 'trialing'].includes(subscription.status), // Include trialing status
+                    cancel_at_period_end: subscription.cancel_at_period_end,
+                }, {
+                    onConflict: 'stripe_subscription_id'
+                })
+                .select()
+                .single();
+
+            // Also update the user table with the subscription ID for easier lookups
+            if (subData && !subError) {
+                await supabase
+                    .from("users")
+                    .update({ stripe_subscription_id: subscription.id })
+                    .eq("id", user.id);
+            }
+
+            if (subError) {
+                console.error("Error updating subscription:", subError);
+                return NextResponse.json({
+                    status: 500,
+                    error: "Error updating subscription",
+                });
+            }
+
+            // Initialize credit usage window for new subscriptions
+            if (type === "created" && subData) {
+                const startDate = new Date(subscription.current_period_start * 1000);
+                const endDate = new Date(subscription.current_period_end * 1000);
+
+                // Ensure end date is after start date to satisfy database constraint
+                if (endDate <= startDate) {
+                    endDate.setDate(startDate.getDate() + 1);
+                }
+
+                const { error: creditError } = await supabase
+                    .from("credit_usage")
+                    .insert({
+                        user_id: user.id,
+                        subscription_id: subData.id, // Use the database subscription ID, not Stripe ID
+                        usage_window_start: startDate.toISOString().split('T')[0],
+                        usage_window_end: endDate.toISOString().split('T')[0],
+                        credits_used: 0,
+                    });
+
+                if (creditError) {
+                    console.error("Error initializing credit usage:", creditError);
+                    return NextResponse.json({
+                        status: 500,
+                        error: "Error initializing credit usage",
+                    });
+                }
+            }
+        } else if (type === "deleted") {
+            // Mark subscription as inactive and clear user's subscription ID
+            const { error: subError } = await supabase
+                .from("subscriptions")
+                .update({
+                    is_active: false,
+                    end_date: new Date().toISOString().split('T')[0],
+                })
+                .eq("stripe_subscription_id", subscription.id);
+
+            if (subError) {
+                console.error("Error deactivating subscription:", subError);
+                return NextResponse.json({
+                    status: 500,
+                    error: "Error deactivating subscription",
+                });
+            }
+
+            // Clear subscription ID from user table
             await supabase
                 .from("users")
-                .update({ stripe_subscription_id: subscription.id })
+                .update({ stripe_subscription_id: null })
                 .eq("id", user.id);
         }
 
-        if (subError) {
-            console.error("Error updating subscription:", subError);
-            return NextResponse.json({
-                status: 500,
-                error: "Error updating subscription",
-            });
-        }
-
-        // Initialize credit usage window for new subscriptions
-        if (type === "created" && subData) {
-            const startDate = new Date(subscription.current_period_start * 1000);
-            const endDate = new Date(subscription.current_period_end * 1000);
-
-            // Ensure end date is after start date to satisfy database constraint
-            if (endDate <= startDate) {
-                endDate.setDate(startDate.getDate() + 1);
-            }
-
-            const { error: creditError } = await supabase
-                .from("credit_usage")
-                .insert({
-                    user_id: user.id,
-                    subscription_id: subData.id, // Use the database subscription ID, not Stripe ID
-                    usage_window_start: startDate.toISOString().split('T')[0],
-                    usage_window_end: endDate.toISOString().split('T')[0],
-                    credits_used: 0,
-                });
-
-            if (creditError) {
-                console.error("Error initializing credit usage:", creditError);
-                return NextResponse.json({
-                    status: 500,
-                    error: "Error initializing credit usage",
-                });
-            }
-        }
-    } else if (type === "deleted") {
-        // Mark subscription as inactive and clear user's subscription ID
-        const { error: subError } = await supabase
-            .from("subscriptions")
-            .update({
-                is_active: false,
-                end_date: new Date().toISOString().split('T')[0],
-            })
-            .eq("stripe_subscription_id", subscription.id);
-
-        if (subError) {
-            console.error("Error deactivating subscription:", subError);
-            return NextResponse.json({
-                status: 500,
-                error: "Error deactivating subscription",
-            });
-        }
-
-        // Clear subscription ID from user table
-        await supabase
-            .from("users")
-            .update({ stripe_subscription_id: null })
-            .eq("id", user.id);
+        return NextResponse.json({
+            status: 200,
+            message: `Subscription ${type} handled successfully`,
+        });
+    } catch (error) {
+        console.error("Error in subscription event processing:", error);
+        return NextResponse.json({
+            status: 500,
+            error: "Error processing subscription event",
+        });
     }
-
-    return NextResponse.json({
-        status: 200,
-        message: `Subscription ${type} handled successfully`,
-    });
 }
 
 async function handleInvoiceEvent(event: Stripe.Event, status: "succeeded" | "failed") {

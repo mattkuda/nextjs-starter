@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { Button } from '@/components/ui/button'
 import { Textarea } from '@/components/ui/textarea'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import axios from 'axios';
 import { ArrowUp, RotateCcw } from 'lucide-react'
 import { cn } from '../lib/utils'
 import ReactMarkdown from 'react-markdown'
@@ -17,11 +16,6 @@ interface Message {
     content: string
     role: 'assistant' | 'user'
     timestamp: Date
-}
-
-interface AICoachResponse {
-    response: string
-    error?: string
 }
 
 const devInitialState = {
@@ -92,20 +86,50 @@ function TypewriterEffect({ content, onComplete }: { content: string; onComplete
     )
 }
 
-export function AICoach() {
+export function AIChat() {
     const [messages, setMessages] = useState<Message[]>([])
     const [input, setInput] = useState(initialState.input)
     const [isLoading, setIsLoading] = useState(false)
     const [isError, setIsError] = useState(false)
+    const [shouldAutoScroll, setShouldAutoScroll] = useState(true)
     const messagesEndRef = useRef<HTMLDivElement>(null)
+    const messagesContainerRef = useRef<HTMLDivElement>(null)
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const scrollToBottom = (behavior: 'smooth' | 'instant' = 'smooth') => {
+        messagesEndRef.current?.scrollIntoView({ behavior })
     }
 
+    // Check if user is near bottom of scroll area
+    const isNearBottom = () => {
+        if (!messagesContainerRef.current) return true
+        const { scrollTop, scrollHeight, clientHeight } = messagesContainerRef.current
+        return scrollHeight - scrollTop - clientHeight < 100 // Within 100px of bottom
+    }
+
+    // Handle scroll events to detect if user scrolled away
+    const handleScroll = useCallback(() => {
+        if (isNearBottom()) {
+            setShouldAutoScroll(true)
+        } else {
+            setShouldAutoScroll(false)
+        }
+    }, [])
+
+    // Auto-scroll effect for new messages
     useEffect(() => {
-        scrollToBottom()
-    }, [messages])
+        if (shouldAutoScroll) {
+            scrollToBottom()
+        }
+    }, [messages, shouldAutoScroll])
+
+    // Set up scroll event listener
+    useEffect(() => {
+        const container = messagesContainerRef.current
+        if (container) {
+            container.addEventListener('scroll', handleScroll)
+            return () => container.removeEventListener('scroll', handleScroll)
+        }
+    }, [handleScroll])
 
     const handleSendMessage = async () => {
         if (!input.trim()) return
@@ -120,6 +144,15 @@ export function AICoach() {
         setInput('')
         setIsLoading(true)
         setIsError(false)
+        setShouldAutoScroll(true) // Ensure auto-scroll is enabled for new messages
+
+        // Add a placeholder assistant message for streaming
+        const assistantMessage: Message = {
+            content: '',
+            role: 'assistant',
+            timestamp: new Date()
+        }
+        setMessages(prev => [...prev, assistantMessage])
 
         try {
             const conversationHistory = messages.map(msg => ({
@@ -127,31 +160,80 @@ export function AICoach() {
                 content: msg.content
             }))
 
-            const { data } = await axios.post<AICoachResponse>(
-                '/api/aiCoach',
-                {
+            const response = await fetch('/api/aiChat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
                     message: userMessage.content,
                     conversationHistory
+                })
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || 'Failed to generate response')
+            }
+
+            if (!response.body) {
+                throw new Error('No response body')
+            }
+
+            const reader = response.body.getReader()
+            const decoder = new TextDecoder()
+            let accumulatedContent = ''
+            let hasReceivedFirstChunk = false
+
+            while (true) {
+                const { done, value } = await reader.read()
+                if (done) break
+
+                const chunk = decoder.decode(value)
+                const lines = chunk.split('\n')
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const data = line.slice(6)
+                        if (data === '[DONE]') {
+                            break
+                        }
+                        try {
+                            const parsed = JSON.parse(data)
+                            if (parsed.content) {
+                                // Hide loading indicator once we receive the first chunk
+                                if (!hasReceivedFirstChunk) {
+                                    setIsLoading(false)
+                                    hasReceivedFirstChunk = true
+                                }
+
+                                accumulatedContent += parsed.content
+                                // Update the assistant message with accumulated content
+                                setMessages(prev => prev.map((msg, index) =>
+                                    index === prev.length - 1 && msg.role === 'assistant'
+                                        ? { ...msg, content: accumulatedContent }
+                                        : msg
+                                ))
+
+                                // Auto-scroll during streaming if enabled
+                                if (shouldAutoScroll) {
+                                    setTimeout(() => scrollToBottom('instant'), 0)
+                                }
+                            }
+                        } catch {
+                            // Skip invalid JSON
+                        }
+                    }
                 }
-            )
-
-            if (data.error) {
-                throw new Error(data.error)
             }
-
-            const assistantMessage: Message = {
-                // id: (Date.now() + 1).toString(),
-                content: data.response,
-                role: 'assistant',
-                timestamp: new Date()
-            }
-
-            setMessages(prev => [...prev, assistantMessage])
         } catch (error) {
             console.error('Error generating reply:', error)
             setIsError(true)
-            toast.error("There was an error generating your response. Please try again.");
+            // Remove the placeholder assistant message on error
+            setMessages(prev => prev.slice(0, -1))
+            toast.error("There was an error generating your response. Please try again.")
         } finally {
+            // Only set loading to false if it hasn't been set to false already during streaming
             setIsLoading(false)
         }
     }
@@ -179,7 +261,7 @@ export function AICoach() {
                             value={input}
                             onChange={handleTextareaChange}
                             onKeyDown={handleKeyDown}
-                            placeholder="Message AI Coach..."
+                            placeholder="Message AI Chat..."
                             className="w-full resize-none bg-muted px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring rounded-md"
                             rows={3}
                         />
@@ -194,7 +276,7 @@ export function AICoach() {
                 </div>
             ) : (
                 <>
-                    <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
+                    <div ref={messagesContainerRef} className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4">
                         {messages.map((message) => (
                             <div
                                 key={message.timestamp.getTime()}
@@ -231,10 +313,22 @@ export function AICoach() {
                                         </div>
                                     )}
                                     {message.role === 'assistant' ? (
-                                        <TypewriterEffect
-                                            content={message.content}
-                                            onComplete={() => { }}
-                                        />
+                                        message.content ? (
+                                            <TypewriterEffect
+                                                content={message.content}
+                                                onComplete={() => { }}
+                                            />
+                                        ) : isLoading ? (
+                                            <div className="rounded-lg p-3 bg-muted border border-border">
+                                                <div className="flex items-center space-x-1">
+                                                    <div className="flex space-x-1">
+                                                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                                                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                                                        <div className="w-2 h-2 bg-muted-foreground rounded-full animate-bounce"></div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ) : null
                                     ) : (
                                         <div className="rounded-lg p-3 bg-primary/10 border border-primary/20">
                                             <p className="text-foreground whitespace-pre-wrap">{message.content}</p>
@@ -249,21 +343,6 @@ export function AICoach() {
                                 )}
                             </div>
                         ))}
-                        {isLoading && (
-                            <div className="flex gap-3">
-                                <Avatar className="h-8 w-8">
-                                    <AvatarImage src="/ai-avatar.png" alt="AI" />
-                                    <AvatarFallback>AI</AvatarFallback>
-                                </Avatar>
-                                <div className="flex items-center">
-                                    <div className="flex space-x-2">
-                                        <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400" />
-                                        <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400 [animation-delay:0.2s]" />
-                                        <div className="h-2 w-2 animate-bounce rounded-full bg-gray-400 [animation-delay:0.4s]" />
-                                    </div>
-                                </div>
-                            </div>
-                        )}
                         <div ref={messagesEndRef} />
                     </div>
                     {/* Input Container */}
@@ -273,7 +352,7 @@ export function AICoach() {
                                 value={input}
                                 onChange={handleTextareaChange}
                                 onKeyDown={handleKeyDown}
-                                placeholder="Message AI Coach..."
+                                placeholder="Message AI Chat..."
                                 className="min-h-[44px] max-h-24 w-full resize-none bg-muted px-3 py-3 pr-14 text-sm text-foreground placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring overflow-y-auto"
                             />
                             <div className="absolute right-2 bottom-4 flex items-center gap-2">
@@ -291,7 +370,7 @@ export function AICoach() {
                             </div>
                         </div>
                         <p className="mt-2 text-[11px] text-muted-foreground">
-                            AI Coach can make mistakes. Consider checking important information.
+                            AI Chat can make mistakes. Consider checking important information.
                         </p>
                     </div>
                 </>

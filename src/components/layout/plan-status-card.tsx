@@ -1,8 +1,9 @@
 'use client'
 
 import { Card, CardContent } from "@/components/ui/card"
-import { Crown, ZapIcon, ArrowUpRight, Zap, Sparkle } from "lucide-react"
-import { SubscriptionStatus } from "@/lib/constants"
+import { ArrowUpRight } from "lucide-react"
+import { SubscriptionStatus, PLANS } from "@/lib/constants"
+import { Users } from "lucide-react"
 
 interface PlanStatusCardProps {
     subscriptionStatus?: SubscriptionStatus
@@ -14,39 +15,41 @@ interface PlanStatusCardProps {
 export function PlanStatusCard({ subscriptionStatus, isClickable = true, onUpgradeClick, isLoading = false }: PlanStatusCardProps) {
 
     const getPlanInfo = () => {
-        switch (subscriptionStatus) {
-            case SubscriptionStatus.STARTER:
-                return {
-                    icon: Sparkle,
-                    name: 'Starter Plan',
-                    description: '100 monthly credits',
-                    color: 'text-blue-500',
-                    canUpgrade: true
-                }
-            case SubscriptionStatus.PRO:
-                return {
-                    icon: Zap,
-                    name: 'Pro Plan',
-                    description: '500 monthly credits',
-                    color: 'text-purple-500',
-                    canUpgrade: true
-                }
-            case SubscriptionStatus.MAX:
-                return {
-                    icon: Crown,
-                    name: 'Max Plan',
-                    description: 'All features unlocked',
-                    color: 'text-orange-500',
-                    canUpgrade: false
-                }
-            default:
-                return {
-                    icon: ZapIcon,
-                    name: 'Free Plan',
-                    description: '5 total credits',
-                    color: 'text-muted-foreground',
-                    canUpgrade: true
-                }
+        // Find the plan from centralized config
+        const plan = PLANS.find(p => p.id === subscriptionStatus?.toLowerCase())
+
+        if (plan) {
+            const IconComponent = plan.icon
+            let color = 'text-muted-foreground'
+
+            switch (plan.id) {
+                case 'starter':
+                    color = 'text-blue-500'
+                    break
+                case 'pro':
+                    color = 'text-purple-500'
+                    break
+                case 'max':
+                    color = 'text-orange-500'
+                    break
+            }
+
+            return {
+                icon: IconComponent,
+                name: `${plan.name} Plan`,
+                description: `${plan.credits} monthly credits`,
+                color: color,
+                canUpgrade: plan.id !== 'max'
+            }
+        }
+
+        // Fallback for FREE status
+        return {
+            icon: Users,
+            name: 'Free Plan',
+            description: '5 total credits',
+            color: 'text-muted-foreground',
+            canUpgrade: true
         }
     }
 
@@ -88,7 +91,7 @@ export function PlanStatusCard({ subscriptionStatus, isClickable = true, onUpgra
                                 className="text-xs text-muted-foreground hover:text-primary transition-colors flex items-center gap-1 group"
                             >
                                 Upgrade for more features
-                                <ArrowUpRight className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+                                <ArrowUpRight className="h-3 w-3 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />
                             </button>
                         ) : (
                             <p className="text-xs text-muted-foreground">{planInfo.description}</p>

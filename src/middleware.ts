@@ -70,14 +70,15 @@ export default clerkMiddleware(async (auth, req) => {
 
     // ✅ Handle public routes
     if (isPublicRoute(req)) {
-        // If authenticated and accessing sign-in/sign-up, redirect to dashboard
+        // If authenticated and accessing sign-in/sign-up, redirect to onboarding
+        // (since new users should go to onboarding, and existing users will be redirected from there if they have a subscription)
         if (userId && shouldRedirectToDashboard(req)) {
-            return NextResponse.redirect(new URL("/dashboard", req.url));
+            return NextResponse.redirect(new URL("/onboarding", req.url));
         }
 
-        // If authenticated and visiting the homepage, redirect to dashboard
+        // If authenticated and visiting the homepage, redirect to onboarding
         if (userId && pathname === "/") {
-            return NextResponse.redirect(new URL("/dashboard", req.url));
+            return NextResponse.redirect(new URL("/onboarding", req.url));
         }
 
         return NextResponse.next();

@@ -1,3 +1,16 @@
+-- MIGRATION COMMANDS (run these if you have existing tables):
+-- For subscriptions table:
+-- alter table subscriptions add column tier text check (tier in ('starter', 'pro', 'max'));
+-- alter table subscriptions add column billing_cycle text check (billing_cycle in ('monthly', 'yearly'));
+-- update subscriptions set tier = 'starter', billing_cycle = 'monthly' where tier is null; -- Set defaults for existing records
+-- alter table subscriptions alter column tier set not null;
+-- alter table subscriptions alter column billing_cycle set not null;
+
+-- For users table (add additional_context field):
+-- alter table users add column additional_context text;
+
+-- FRESH SETUP (use this for new installations):
+
 -- Users authenticated via Clerk
 create table users (
   id uuid primary key default gen_random_uuid(),
@@ -5,17 +18,19 @@ create table users (
   email text not null,
   first_name text,
   last_name text,
+  additional_context text,
   stripe_subscription_id text unique,
   created_at timestamp with time zone default now(),
   modified_at timestamp with time zone default now()
 );
 
 -- Subscription records (1 active per user at a time)
--- Note: Plan details are stored in frontend component, not database
 create table subscriptions (
   id uuid primary key default gen_random_uuid(),
   user_id uuid references users(id) on delete cascade,
   stripe_subscription_id text unique,
+  tier text not null check (tier in ('starter', 'pro', 'max')),
+  billing_cycle text not null check (billing_cycle in ('monthly', 'yearly')),
   start_date date not null,
   end_date date not null,
   is_active boolean default true,

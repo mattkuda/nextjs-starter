@@ -75,9 +75,6 @@ export default function SettingsPage() {
                         <Card>
                             <CardHeader>
                                 <CardTitle>Profile Information</CardTitle>
-                                <CardDescription>
-                                    Update your personal information and preferences.
-                                </CardDescription>
                             </CardHeader>
                             <CardContent>
                                 <UserProfile user={userData} />

@@ -1,3 +1,5 @@
+import { Sparkles, Zap, Crown } from "lucide-react"
+
 export enum SubscriptionStatus {
     FREE = 'free',
     STARTER = 'starter',
@@ -76,7 +78,7 @@ export const WORKER_TYPES: Record<string, WorkerType> = {
     MARKETING: {
         value: 'marketing',
         label: 'Marketing',
-        emoji: '��'
+        emoji: ''
     }
 } as const
 
@@ -107,3 +109,64 @@ export const TESTIMONIALS: Testimonial[] = [
         imageUrl: "/erik.png"
     }
 ];
+
+export const PLANS = [
+    {
+        id: 'starter' as const,
+        name: 'Starter',
+        monthlyPrice: 9.99,
+        yearlyPrice: 99.9, // 10 months pricing (2 months free)
+        credits: 100,
+        description: 'Perfect for individuals getting started with AI-powered workflows.',
+        icon: Sparkles,
+        isPopular: false,
+        features: [
+            'Access to all core features',
+            '100 monthly credits',
+            'Basic AI assistance',
+            'Email support',
+            'Standard processing speed'
+        ]
+    },
+    {
+        id: 'pro' as const,
+        name: 'Pro',
+        monthlyPrice: 19.99,
+        yearlyPrice: 199.9, // 10 months pricing (2 months free)
+        credits: 500,
+        description: 'Ideal for professionals and small teams with higher usage needs.',
+        isPopular: true,
+        icon: Zap,
+        features: [
+            'Everything in Starter',
+            '500 monthly credits',
+            'Advanced AI assistance',
+            'Priority email support',
+            'Advanced tone options',
+            'Faster processing speed',
+            'Custom templates'
+        ]
+    },
+    {
+        id: 'max' as const,
+        name: 'Max',
+        monthlyPrice: 49.99,
+        yearlyPrice: 499.9, // 10 months pricing (2 months free)
+        credits: 2000,
+        description: 'For power users and teams that need maximum capacity.',
+        icon: Crown,
+        isPopular: false,
+        features: [
+            'Everything in Pro',
+            '2,000 monthly credits',
+            'Premium AI assistance',
+            'Phone & priority support',
+            'Advanced integrations',
+            'Custom AI models',
+            'Team collaboration',
+            'Analytics dashboard'
+        ]
+    }
+] as const
+
+export type PlanId = typeof PLANS[number]['id']

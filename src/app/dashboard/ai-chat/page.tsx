@@ -1,5 +1,5 @@
 import { DashboardLayout } from '@/components/layout/dashboard-layout'
-import { AICoach } from '@/components/AICoach'
+import { AIChat } from '@/components/AIChat'
 import { MessageCircle } from 'lucide-react'
 
 export default function AiChatPage() {
@@ -16,9 +16,9 @@ export default function AiChatPage() {
                     </p>
                 </div>
                 <div className="flex-1 min-h-0">
-                    <AICoach />
+                    <AIChat />
                 </div>
             </div>
         </DashboardLayout>
     )
-} 
+}

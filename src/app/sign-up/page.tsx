@@ -10,8 +10,8 @@ export default function SignUpPage() {
                 routing="path"
                 signInUrl="/sign-in"
                 signInFallbackRedirectUrl="/dashboard"
-                fallbackRedirectUrl="/dashboard"
+                fallbackRedirectUrl="/onboarding"
             />
         </div>
     );
-} 
+}

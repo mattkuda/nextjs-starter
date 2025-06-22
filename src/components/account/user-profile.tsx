@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { User } from '@/types'
 import { SaveIcon, CheckIcon } from 'lucide-react'
 import { CircularProgress } from '@mui/material'
@@ -17,8 +18,7 @@ export function UserProfile({ user }: UserProfileProps) {
     const [formData, setFormData] = useState({
         first_name: user?.first_name,
         last_name: user?.last_name,
-        job_title: user?.job_title,
-        organization_name: user?.organization_name,
+        additional_context: user?.additional_context,
     })
 
     const handleSave = async () => {
@@ -46,9 +46,6 @@ export function UserProfile({ user }: UserProfileProps) {
 
     return (
         <div className="space-y-6">
-            <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">These details are used to identify you in threads and better understand the context.</p>
-            </div>
             <div className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
@@ -71,21 +68,14 @@ export function UserProfile({ user }: UserProfileProps) {
                     </div>
                 </div>
                 <div>
-                    <label htmlFor="job_title" className="block text-sm font-medium text-foreground mb-2">Job Title</label>
-                    <Input
-                        id="job_title"
-                        value={formData.job_title || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, job_title: e.target.value }))}
+                    <label htmlFor="additional_context" className="block text-sm font-medium text-foreground mb-2">Additional Context</label>
+                    <Textarea
+                        id="additional_context"
+                        value={formData.additional_context || ''}
+                        onChange={(e) => setFormData(prev => ({ ...prev, additional_context: e.target.value }))}
                         className="bg-background border-input"
-                    />
-                </div>
-                <div>
-                    <label htmlFor="organization_name" className="block text-sm font-medium text-foreground mb-2">Organization Name</label>
-                    <Input
-                        id="organization_name"
-                        value={formData.organization_name || ''}
-                        onChange={(e) => setFormData(prev => ({ ...prev, organization_name: e.target.value }))}
-                        className="bg-background border-input"
+                        rows={5}
+                        placeholder="Provide additional context about yourself that can help when using AI features..."
                     />
                 </div>
                 <Button

@@ -101,8 +101,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         }
     }, [refetch]);
 
-    // Silent redirect to onboarding if user has no active subscription
-    // BUT skip redirect if coming from successful payment (success=true param)
+    // Enhanced subscription status checking with race condition handling
     useEffect(() => {
         if (typeof window === "undefined") return;
 
@@ -114,10 +113,47 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             return;
         }
 
+        // If user data is loaded and shows FREE status, do additional verification
+        // to handle potential race conditions
         if (!isLoading && userData && userData.subscription_status === SubscriptionStatus.FREE) {
-            window.location.href = '/onboarding'
+            // Check if this is a new user (created recently) who might have just subscribed
+            const userCreatedAt = new Date(userData.created_at);
+            const now = new Date();
+            const timeSinceCreation = now.getTime() - userCreatedAt.getTime();
+            const isRecentUser = timeSinceCreation < 5 * 60 * 1000; // 5 minutes
+
+            if (isRecentUser) {
+                // For recent users, do an additional subscription status check
+                // with retry logic to handle webhook processing delays
+                console.log('Recent user with FREE status, performing additional verification...');
+
+                const verifySubscription = async () => {
+                    try {
+                        const response = await axios.get('/api/subscription-status');
+                        const { subscription_status } = response.data;
+
+                        if (subscription_status !== SubscriptionStatus.FREE) {
+                            // Subscription found! Refetch user data to update UI
+                            console.log('Subscription verified, refreshing user data...');
+                            await refetch();
+                            return;
+                        }
+                    } catch (error) {
+                        console.error('Error verifying subscription:', error);
+                    }
+
+                    // If still no subscription after verification, redirect to onboarding
+                    window.location.href = '/onboarding';
+                };
+
+                // Delay the verification slightly to allow for webhook processing
+                setTimeout(verifySubscription, 1000);
+            } else {
+                // For older users, redirect immediately
+                window.location.href = '/onboarding';
+            }
         }
-    }, [isLoading, userData])
+    }, [isLoading, userData, refetch])
 
     const initials = userData?.first_name && userData?.last_name ? userData?.first_name?.charAt(0).toUpperCase() + userData?.last_name?.charAt(0).toUpperCase() : userData?.email?.charAt(0).toUpperCase()
 
@@ -257,7 +293,11 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
                     </div>
                 </div>
             </div>
-            <UpgradeModal isOpen={isUpgradeModalOpen} onClose={() => setIsUpgradeModalOpen(false)} />
+            <UpgradeModal
+                isOpen={isUpgradeModalOpen}
+                onClose={() => setIsUpgradeModalOpen(false)}
+                currentSubscriptionStatus={userData?.subscription_status}
+            />
         </>
     )
 }

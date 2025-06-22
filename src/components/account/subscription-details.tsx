@@ -6,8 +6,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { ConfirmationModal } from "@/components/ui/confirmation-modal"
+import { UpgradeModal } from "@/components/UpgradeModal"
 import { User } from "@/types"
-import { CREDITS_LIMITS, SubscriptionStatus } from '../../lib/constants'
+import { CREDITS_LIMITS, SubscriptionStatus, PLANS } from '../../lib/constants'
+import { useQueryClient } from '@tanstack/react-query'
 import { Separator } from "@/components/ui/separator"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
 import {
@@ -17,10 +19,9 @@ import {
     Check,
     Trash2,
     RefreshCw,
-    Rocket,
-    Crown,
-    Star,
-    ChevronDown
+    ChevronDown,
+    ArrowUpRight,
+    Users
 } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -31,7 +32,9 @@ interface SubscriptionDetailsProps {
 export function SubscriptionDetails({ user }: SubscriptionDetailsProps) {
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+    const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false)
     const [isUpgrading, setIsUpgrading] = useState(false)
+    const queryClient = useQueryClient()
 
     const handleUpgrade = async (plan: 'starter' | 'pro' | 'max') => {
         setIsUpgrading(true)
@@ -63,14 +66,23 @@ export function SubscriptionDetails({ user }: SubscriptionDetailsProps) {
 
     const handleCancelSubscription = async () => {
         try {
-            await fetch('/api/cancelSubscription', {
+            const response = await fetch('/api/cancelSubscription', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({ subscriptionId: user?.stripe_subscription_id }),
             });
+
+            if (!response.ok) {
+                throw new Error('Failed to cancel subscription');
+            }
+
             setIsCancelModalOpen(false)
+
+            // Refresh user data to show updated cancellation status
+            queryClient.invalidateQueries({ queryKey: ['user'] });
+
             toast.success("Subscription cancelled", {
                 description: "Your subscription has been cancelled. You will retain access until your current billing period ends.",
             })
@@ -82,52 +94,77 @@ export function SubscriptionDetails({ user }: SubscriptionDetailsProps) {
 
     const handleDeleteAccount = async () => {
         try {
-            await fetch('/api/deleteAccount', { method: 'POST' });
+            const response = await fetch('/api/deleteAccount', { method: 'POST' });
+
+            if (!response.ok) {
+                throw new Error('Failed to delete account');
+            }
+
             setIsDeleteModalOpen(false)
+
             toast.success("Account deleted", {
-                description: "Your account has been successfully deleted.",
+                description: "Your account has been successfully deleted. You will be redirected shortly.",
             })
+
+            // Redirect to home page after a short delay
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 2000);
+
         } catch (error) {
             console.error('Error deleting account:', error);
             toast.error('Failed to delete account. Please try again.')
         }
     }
 
-    const getSubscriptionStatusInfo = () => {
-        switch (user?.subscription_status) {
-            case SubscriptionStatus.STARTER:
-                return {
-                    label: 'Starter Plan',
-                    color: 'bg-blue-100 text-blue-700 border-blue-200',
-                    icon: <Rocket className="h-4 w-4" />
-                }
-            case SubscriptionStatus.PRO:
-                return {
-                    label: 'Pro Plan',
-                    color: 'bg-purple-100 text-purple-700 border-purple-200',
-                    icon: <Star className="h-4 w-4" />
-                }
-            case SubscriptionStatus.MAX:
-                return {
-                    label: 'Max Plan',
-                    color: 'bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 border-orange-200',
-                    icon: <Crown className="h-4 w-4" />
-                }
-            default:
-                return {
-                    label: 'Free Plan',
-                    color: 'bg-gray-100 text-gray-700 border-gray-200',
-                    icon: <Zap className="h-4 w-4" />
-                }
+    const getPlanDetails = (status: SubscriptionStatus) => {
+        const plan = PLANS.find(p => p.id === status.toLowerCase())
+
+        if (plan) {
+            const IconComponent = plan.icon
+            let color = 'bg-gray-100 text-gray-700 border-gray-200'
+
+            switch (plan.id) {
+                case 'starter':
+                    color = 'bg-primary/70 border-primary/20'
+                    break
+                case 'pro':
+                    color = 'bg-secondary/70 border-secondary/20'
+                    break
+                case 'max':
+                    color = 'bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 border-orange-200'
+                    break
+            }
+
+            return {
+                name: plan.name,
+                icon: <IconComponent className="h-4 w-4" />,
+                credits: plan.credits,
+                monthlyPrice: plan.monthlyPrice,
+                yearlyPrice: plan.yearlyPrice,
+                features: plan.features,
+                color: color
+            }
+        }
+
+        // Fallback for FREE status
+        return {
+            name: 'Free',
+            icon: <Users className="h-4 w-4" />,
+            credits: 5,
+            monthlyPrice: 0,
+            yearlyPrice: 0,
+            features: ['5 total credits', 'Basic features', 'Email support'],
+            color: 'bg-gray-100 text-gray-700 border-gray-200'
         }
     }
 
-    const statusInfo = getSubscriptionStatusInfo()
-    const maxCredits = CREDITS_LIMITS[user?.subscription_status as keyof typeof CREDITS_LIMITS] || 0
-    const currentCredits = user?.credits || 0
-    const creditsUsed = maxCredits - currentCredits
-    // Progress bar shows remaining credits (should decrease as credits are used)
-    const creditsPercentage = maxCredits > 0 ? (currentCredits / maxCredits) * 100 : 0
+    const statusInfo = getPlanDetails(user?.subscription_status || SubscriptionStatus.FREE)
+    const maxCredits = user?.max_credits || CREDITS_LIMITS[user?.subscription_status as keyof typeof CREDITS_LIMITS] || 0
+    const remainingCredits = user?.credits || 0  // remaining credits from API
+    const usedCredits = user?.credits_used || 0  // used credits from API
+    // Progress bar shows remaining credits percentage
+    const creditsPercentage = maxCredits > 0 ? (remainingCredits / maxCredits) * 100 : 0
 
     const formatDate = (dateString: string | null) => {
         if (!dateString) return 'N/A'
@@ -138,20 +175,7 @@ export function SubscriptionDetails({ user }: SubscriptionDetailsProps) {
         })
     }
 
-    const getNextResetDate = () => {
-        if (user?.subscription_status !== SubscriptionStatus.FREE && user?.subscription_end_date) {
-            // For paid users, credits reset on the subscription renewal date
-            return formatDate(user.subscription_end_date)
-        }
-        // For free users, credits reset monthly (first of each month)
-        const now = new Date()
-        const nextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1)
-        return nextMonth.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
-        })
-    }
+
 
     return (
         <div className="space-y-6">
@@ -163,7 +187,7 @@ export function SubscriptionDetails({ user }: SubscriptionDetailsProps) {
                             <CardTitle className="text-lg">Current Plan</CardTitle>
                             <Badge className={statusInfo.color}>
                                 {statusInfo.icon}
-                                <span className="ml-1">{statusInfo.label}</span>
+                                <span className="ml-1">{statusInfo.name}</span>
                             </Badge>
                         </div>
                         {user?.is_cancel_scheduled && (
@@ -174,31 +198,41 @@ export function SubscriptionDetails({ user }: SubscriptionDetailsProps) {
                         )}
                     </div>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6">
                     {/* Credits Usage */}
-                    <div className="space-y-2">
+                    <div className="space-y-3">
                         <div className="flex justify-between items-center">
-                            <span className="text-sm font-medium text-foreground">Credits</span>
-                            <span className="text-sm text-muted-foreground">
-                                {currentCredits} / {maxCredits} remaining
+                            <div className="flex items-center space-x-2">
+                                <Zap className="h-4 w-4 text-primary" />
+                                <span className="text-sm font-medium text-foreground">Credits</span>
+                            </div>
+                            <span className="text-sm font-semibold text-foreground">
+                                {remainingCredits} / {maxCredits} remaining
                             </span>
                         </div>
-                        <Progress value={creditsPercentage} className="h-2" />
-                        <p className="text-xs text-muted-foreground">
-                            {creditsUsed} of {maxCredits} credits used this period
-                        </p>
+                        <div className="space-y-2">
+                            <Progress value={creditsPercentage} className="h-3" />
+                            <div className="flex justify-between text-xs text-muted-foreground">
+                                <span>{usedCredits} used</span>
+                                <span>{Math.round(creditsPercentage)}% remaining</span>
+                            </div>
+                        </div>
                     </div>
 
                     <Separator />
 
                     {/* Subscription Details */}
                     <div className="space-y-3">
+                        {/* For paid subscriptions */}
                         {user?.subscription_status !== SubscriptionStatus.FREE && user?.subscription_end_date && (
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-2">
                                     <Calendar className="h-4 w-4 text-muted-foreground" />
                                     <span className="text-sm font-medium">
-                                        {user?.is_cancel_scheduled ? 'Expires on' : 'Renews on'}
+                                        {user?.is_cancel_scheduled
+                                            ? 'Subscription expires on'
+                                            : 'Credits and subscription renew on'
+                                        }
                                     </span>
                                 </div>
                                 <span className="text-sm text-muted-foreground">
@@ -207,15 +241,18 @@ export function SubscriptionDetails({ user }: SubscriptionDetailsProps) {
                             </div>
                         )}
 
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center space-x-2">
-                                <RefreshCw className="h-4 w-4 text-muted-foreground" />
-                                <span className="text-sm font-medium">Credits reset</span>
+                        {/* For free users only - show credits reset info */}
+                        {user?.subscription_status === SubscriptionStatus.FREE && (
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center space-x-2">
+                                    <RefreshCw className="h-4 w-4 text-muted-foreground" />
+                                    <span className="text-sm font-medium">Credits reset</span>
+                                </div>
+                                <span className="text-sm text-muted-foreground">
+                                    Never (one-time allocation)
+                                </span>
                             </div>
-                            <span className="text-sm text-muted-foreground">
-                                {getNextResetDate()}
-                            </span>
-                        </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -231,63 +268,46 @@ export function SubscriptionDetails({ user }: SubscriptionDetailsProps) {
                     </CardHeader>
                     <CardContent>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="border rounded-lg p-4 hover:border-primary transition-colors">
-                                <div className="space-y-2">
-                                    <div className="flex items-center space-x-2">
-                                        <Rocket className="h-4 w-4 text-blue-500" />
-                                        <h4 className="font-medium">Starter</h4>
-                                    </div>
-                                    <p className="text-2xl font-bold">$9.99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                                    <p className="text-sm text-muted-foreground">100 credits/month</p>
-                                    <Button
-                                        size="sm"
-                                        className="w-full"
-                                        onClick={() => handleUpgrade('starter')}
-                                        disabled={isUpgrading}
+                            {PLANS.map((plan) => {
+                                const IconComponent = plan.icon
+                                const isPopular = plan.isPopular
+                                const colorMap = {
+                                    starter: 'text-blue-500',
+                                    pro: 'text-purple-500',
+                                    max: 'text-orange-500'
+                                }
+
+                                return (
+                                    <div
+                                        key={plan.id}
+                                        className={`border rounded-lg p-4 hover:border-primary transition-colors ${isPopular ? 'border-primary' : ''
+                                            }`}
                                     >
-                                        {isUpgrading ? 'Processing...' : 'Upgrade to Starter'}
-                                    </Button>
-                                </div>
-                            </div>
-                            <div className="border rounded-lg p-4 hover:border-primary transition-colors border-primary">
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center space-x-2">
-                                            <Star className="h-4 w-4 text-purple-500" />
-                                            <h4 className="font-medium">Pro</h4>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between">
+                                                <div className="flex items-center space-x-2">
+                                                    <IconComponent className={`h-4 w-4 ${colorMap[plan.id]}`} />
+                                                    <h4 className="font-medium">{plan.name}</h4>
+                                                </div>
+                                                {isPopular && <Badge>Most Popular</Badge>}
+                                            </div>
+                                            <p className="text-2xl font-bold">
+                                                ${plan.monthlyPrice.toFixed(2)}
+                                                <span className="text-sm font-normal text-muted-foreground">/month</span>
+                                            </p>
+                                            <p className="text-sm text-muted-foreground">{plan.credits} credits/month</p>
+                                            <Button
+                                                size="sm"
+                                                className="w-full"
+                                                onClick={() => handleUpgrade(plan.id)}
+                                                disabled={isUpgrading}
+                                            >
+                                                {isUpgrading ? 'Processing...' : `Upgrade to ${plan.name}`}
+                                            </Button>
                                         </div>
-                                        <Badge>Most Popular</Badge>
                                     </div>
-                                    <p className="text-2xl font-bold">$19.99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                                    <p className="text-sm text-muted-foreground">500 credits/month</p>
-                                    <Button
-                                        size="sm"
-                                        className="w-full"
-                                        onClick={() => handleUpgrade('pro')}
-                                        disabled={isUpgrading}
-                                    >
-                                        {isUpgrading ? 'Processing...' : 'Upgrade to Pro'}
-                                    </Button>
-                                </div>
-                            </div>
-                            <div className="border rounded-lg p-4 hover:border-primary transition-colors">
-                                <div className="space-y-2">
-                                    <div className="flex items-center space-x-2">
-                                        <Crown className="h-4 w-4 text-orange-500" />
-                                        <h4 className="font-medium">Max</h4>
-                                    </div>
-                                    <p className="text-2xl font-bold">$49.99<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                                    <p className="text-sm text-muted-foreground">2,000 credits/month</p>
-                                    <Button
-                                        size="sm"
-                                        className="w-full"
-                                        onClick={() => handleUpgrade('max')}
-                                        disabled={isUpgrading}
-                                    >
-                                        {isUpgrading ? 'Processing...' : 'Upgrade to Max'}
-                                    </Button>
-                                </div>
-                            </div>
+                                )
+                            })}
                         </div>
                     </CardContent>
                 </Card>
@@ -312,11 +332,12 @@ export function SubscriptionDetails({ user }: SubscriptionDetailsProps) {
                                     </div>
                                     <Button
                                         variant="outline"
-                                        onClick={() => handleUpgrade(user?.subscription_status === SubscriptionStatus.STARTER ? 'pro' : 'max')}
+                                        className="group"
+                                        onClick={() => setIsUpgradeModalOpen(true)}
                                         disabled={isUpgrading}
                                     >
-                                        <Zap className="h-4 w-4 mr-2" />
-                                        {isUpgrading ? 'Processing...' : 'Upgrade'}
+                                        Upgrade Plan
+                                        <ArrowUpRight className="h-4 w-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-200" />
                                     </Button>
                                 </div>
                             )}
@@ -407,6 +428,12 @@ export function SubscriptionDetails({ user }: SubscriptionDetailsProps) {
                 onConfirm={handleDeleteAccount}
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
+            />
+
+            <UpgradeModal
+                isOpen={isUpgradeModalOpen}
+                onClose={() => setIsUpgradeModalOpen(false)}
+                currentSubscriptionStatus={user?.subscription_status}
             />
         </div>
     )

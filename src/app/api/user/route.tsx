@@ -22,7 +22,7 @@ const PRICE_ID_TO_TIER: Record<string, SubscriptionStatus> = {
     [process.env.STRIPE_PRO_YEARLY_PRICE_ID!]: SubscriptionStatus.PRO,
     [process.env.STRIPE_MAX_YEARLY_PRICE_ID!]: SubscriptionStatus.MAX,
 };
-async function determineSubscriptionStatus(user: { id: string; stripe_subscription_id?: string }): Promise<SubscriptionStatus> {
+async function determineSubscriptionStatus(user: { id: string; stripe_subscription_id?: string }, retryCount = 0): Promise<SubscriptionStatus> {
     try {
         let stripeSubscriptionId = user.stripe_subscription_id;
 
@@ -39,6 +39,13 @@ async function determineSubscriptionStatus(user: { id: string; stripe_subscripti
         }
 
         if (!stripeSubscriptionId) {
+            // If this is the first attempt and we're checking soon after signup,
+            // wait a bit and retry to allow webhook processing time
+            if (retryCount === 0) {
+                console.log(`No subscription found for user ${user.id}, retrying after delay...`);
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
+                return determineSubscriptionStatus(user, retryCount + 1);
+            }
             return SubscriptionStatus.FREE;
         }
 
@@ -60,8 +67,50 @@ async function determineSubscriptionStatus(user: { id: string; stripe_subscripti
         return PRICE_ID_TO_TIER[priceId] || SubscriptionStatus.FREE;
     } catch (error) {
         console.error("Error determining subscription status:", error);
+
+        // If this is a Stripe API error and we haven't retried yet, try once more
+        if (retryCount === 0 && error instanceof Error && error.message.includes('No such subscription')) {
+            console.log(`Stripe subscription not found, retrying after delay...`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            return determineSubscriptionStatus(user, retryCount + 1);
+        }
+
         return SubscriptionStatus.FREE;
     }
+}
+
+async function getCurrentCreditsUsage(userId: string, subscriptionStatus: SubscriptionStatus): Promise<{ remaining: number; used: number; maxCredits: number }> {
+    // Import credits limits
+    const { CREDITS_LIMITS } = await import('@/lib/constants');
+    const maxCredits = CREDITS_LIMITS[subscriptionStatus] || 0;
+
+    if (subscriptionStatus === SubscriptionStatus.FREE) {
+        // For free users, check total usage from credit_usage_log
+        const { data: totalUsage } = await supabase
+            .from('credit_usage_log')
+            .select('credits_used')
+            .eq('user_id', userId);
+
+        const used = totalUsage?.reduce((sum, log) => sum + log.credits_used, 0) || 0;
+        const remaining = Math.max(0, maxCredits - used);
+
+        return { remaining, used, maxCredits };
+    }
+
+    // For paid users, get current billing window usage
+    const now = new Date();
+    const { data: currentUsage } = await supabase
+        .from('credit_usage')
+        .select('credits_used')
+        .eq('user_id', userId)
+        .lte('usage_window_start', now.toISOString().split('T')[0])
+        .gte('usage_window_end', now.toISOString().split('T')[0])
+        .single();
+
+    const used = currentUsage?.credits_used || 0;
+    const remaining = Math.max(0, maxCredits - used);
+
+    return { remaining, used, maxCredits };
 }
 
 export async function GET() {
@@ -84,13 +133,33 @@ export async function GET() {
         // Determine subscription status
         const subscriptionStatus = await determineSubscriptionStatus(user);
 
-        // Add subscription status to user data
-        const userWithSubscription = {
+        // Get current credits usage
+        const creditsInfo = await getCurrentCreditsUsage(user.id, subscriptionStatus);
+
+        // Get enhanced subscription details if user has a subscription
+        let enhancedUser = {
             ...user,
-            subscription_status: subscriptionStatus
+            subscription_status: subscriptionStatus,
+            credits: creditsInfo.remaining,
+            credits_used: creditsInfo.used,
+            max_credits: creditsInfo.maxCredits
         };
 
-        return NextResponse.json(userWithSubscription)
+        if (user.stripe_subscription_id) {
+            try {
+                const stripeSubscription = await stripe.subscriptions.retrieve(user.stripe_subscription_id);
+                enhancedUser = {
+                    ...enhancedUser,
+                    subscription_end_date: new Date(stripeSubscription.current_period_end * 1000).toISOString(),
+                    is_cancel_scheduled: stripeSubscription.cancel_at_period_end || user.is_cancel_scheduled || false
+                };
+            } catch (stripeError) {
+                console.error('Error fetching Stripe subscription details:', stripeError);
+                // Continue with existing data if Stripe fails
+            }
+        }
+
+        return NextResponse.json(enhancedUser)
     } catch (error) {
         console.error("Error fetching user data:", error);
         return NextResponse.json(

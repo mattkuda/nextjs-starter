@@ -38,7 +38,7 @@ export function CopyButton({ text, displayText }: { text: string, displayText?: 
                         variant="ghost"
                         size="icon"
                         onClick={() => copyToClipboard(text)}
-                        className="h-8 w-8 rounded-full hover:bg-gray-100 group"
+                        className="h-8 w-8 rounded-full hover:bg-muted group"
                     >
                         {isCopied ? <Check className="h-4 w-4 text-green-600" /> : <Copy className="h-4 w-4 text-gray-600" />}
                     </Button>

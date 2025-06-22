@@ -22,7 +22,10 @@ export default function OnboardingPage() {
     // Redirect to dashboard if user already has a subscription
     useEffect(() => {
         if (!isLoading && userData && userData.subscription_status !== SubscriptionStatus.FREE) {
-            window.location.href = '/dashboard'
+            // Add a small delay to ensure smooth transition
+            setTimeout(() => {
+                window.location.href = '/dashboard'
+            }, 100);
         }
     }, [isLoading, userData])
 

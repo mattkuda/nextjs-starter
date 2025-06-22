@@ -6,11 +6,12 @@ export type User = {
     email: string;
     first_name?: string;
     last_name?: string;
-    job_title?: string;
-    organization_name?: string;
+    additional_context?: string;
     subscription_status: SubscriptionStatus;
     subscription_end_date?: string;
-    credits: number;
+    credits: number; // remaining credits
+    credits_used?: number; // credits used in current period
+    max_credits?: number; // maximum credits for current plan
     created_at: string;
     updated_at: string;
     stripe_customer_id?: string;
