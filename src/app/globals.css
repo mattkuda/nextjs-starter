@@ -152,6 +152,16 @@ body {
   }
 }
 
+@keyframes scrollInfinite {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
 @keyframes marquee {
   from {
     transform: translateX(0);
@@ -243,6 +253,10 @@ body {
   .animate-scroll-left-visible-paused {
     animation: scrollLeftVisible 40s linear infinite;
     animation-play-state: paused;
+  }
+
+  .animate-scroll-infinite {
+    animation: scrollInfinite 30s linear infinite;
   }
 
   .animate-marquee {

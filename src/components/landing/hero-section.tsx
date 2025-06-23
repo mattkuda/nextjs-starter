@@ -5,6 +5,7 @@ import { AnimatedArrowButton } from "@/components/ui/animated-arrow-button"
 import { TechStackCarousel } from './tech-stack-carousel'
 
 export function HeroSection() {
+
     return (
         <div className="relative bg-background">
             {/* Main Hero Content */}
@@ -33,16 +34,21 @@ export function HeroSection() {
             {/* App Screenshot */}
             <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8 pb-20">
                 <div className="border-8 border-border rounded-xl shadow-2xl opacity-0 animate-slide-up [animation-delay:800ms] [animation-fill-mode:forwards] dark:shadow-gray-900/50">
-                    <div className="overflow-hidden rounded-lg bg-card">
-                        <div className="h-[400px]">
-                            <Image
-                                src="/DemoScreenshot.png"
-                                alt="NextJS Starter Dashboard"
-                                width={2880}
-                                height={1620}
-                                className="w-full h-full object-cover object-top"
-                            />
-                        </div>
+                    <div className="overflow-hidden rounded-lg bg-card relative">
+                        <Image
+                            src="/dashboard-screenshot-light.png"
+                            alt="NextJS Starter Dashboard"
+                            width={1500}
+                            height={900}
+                            className="w-full max-w-[90vw] object-contain block dark:hidden"
+                        />
+                        <Image
+                            src="/dashboard-screenshot-dark.png"
+                            alt="NextJS Starter Dashboard"
+                            width={1500}
+                            height={900}
+                            className="w-full max-w-[90vw] object-contain hidden dark:block"
+                        />
                     </div>
                 </div>
             </div>

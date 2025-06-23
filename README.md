@@ -1,56 +1,136 @@
-## NextJS Starter Setup Instructions
+# Next.js SaaS Starter
 
-This guide walks you through setting up NextJS Starter, including Clerk for authentication, Supabase as the database, and Ngrok for webhook testing. Follow these steps to get the app running locally and deployed.
+This is a starter template for building a SaaS application using **Next.js** with support for Clerk authentication, Supabase database, Stripe payments, OpenAI integration, and a comprehensive dashboard for users.
 
-### 1. Prerequisites
-- Ensure you have the following installed:
-  - Node.js (v16 or higher): Download from the Node.js website.
-  - npm or yarn: Comes with Node.js.
-  - Supabase Account: Sign up at Supabase.
-  - Clerk Account: Sign up at Clerk.
-  - Ngrok: Download Ngrok for local webhook testing.
+![Dashboard Screenshot](public/dashboard-screenshot-dark.png)
 
-### 2. Clone the Repository
-- Run git clone <repository-url> in your terminal.
-- Navigate to the project directory with cd nextjs-starter.
+## Features
 
-### 3. Install Dependencies
-- Install required packages by running npm install.
+- Marketing landing page (`/`) with hero section and feature highlights
+- Pricing page with Stripe integration
+- Dashboard pages with AI chat and coaching features
+- User authentication and management with Clerk
+- Subscription management and billing
+- Account settings and user profiles
+- Responsive design with dark/light mode support
+- Webhook handling for real-time updates
 
-### 4. Set Up Environment Variables
-- Create a .env.local file in the root of your project.
-- Add the following environment variables:
-  - NEXT_PUBLIC_CLERK_FRONTEND_API: Your Clerk frontend API key.
-  - CLERK_API_KEY: Your Clerk backend API key.
-  - CLERK_WEBHOOK_SECRET: Your Clerk webhook secret.
-  - NEXT_PUBLIC_SUPABASE_URL: Your Supabase project URL.
-  - SUPABASE_SERVICE_ROLE_KEY: Your Supabase service role key.
-  - NGROK_URL: Your Ngrok public URL (for local webhook testing).
+## Tech Stack
 
-### 5. Configure Clerk
-- Go to your Clerk Dashboard and create a new application.
-- Add a webhook for user.created and user.updated events with the URL http://localhost:3000/api/auth/webhook.
+- **Framework**: [Next.js](https://nextjs.org/)
+- **Database**: [Supabase](https://supabase.com/)
+- **Authentication**: [Clerk](https://clerk.com/)
+- **Payments**: [Stripe](https://stripe.com/)
+- **AI**: [OpenAI](https://openai.com/)
+- **UI Library**: [shadcn/ui](https://ui.shadcn.com/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/)
+- **Language**: [TypeScript](https://www.typescriptlang.org/)
 
-### 6. Configure Supabase
-Log in to Supabase and create a new project.
-- In the SQL editor, create a users table with columns such as id, clerk_user_id, email, and other relevant fields.
-- Add triggers and policies for updating timestamps and managing data securely.
+## Getting Started
 
-### 7. Run Ngrok for Webhook Testing
-- Start your local server with npm run dev.
-- Run Ngrok in a separate terminal with ngrok http 3000.
-- Update your Clerk webhook URL with the public URL provided by Ngrok.
+```bash
+git clone <repository-url>
+cd nextjs-starter
+npm install
+```
 
-### 8. Start the Application
-- Run the development server using npm run dev.
-- Access your app at http://localhost:3000.
+## Running Locally
 
-### 9. Test the Setup
-Use the <SignUp /> component to register a new user.
-- Confirm the user is created in Clerk and synced to Supabase via webhooks.
-- Verify webhook events in Ngrok’s dashboard (http://localhost:4040).
+### 1. Set Up Environment Variables
 
-### 10. Deployment
-- Push your code to a GitHub repository.
-- Deploy the application to Vercel or another hosting platform.
-- Update environment variables in the hosting platform for production use.
+Create a `.env.local` file in the root of your project and add the following:
+
+```env
+NEXT_PUBLIC_CLERK_FRONTEND_API=your_clerk_frontend_api_key
+CLERK_API_KEY=your_clerk_backend_api_key
+CLERK_WEBHOOK_SECRET=your_clerk_webhook_secret
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+OPENAI_API_KEY=your_openai_api_key
+NGROK_URL=your_ngrok_public_url
+```
+
+### 2. Configure Clerk
+
+1. Go to your [Clerk Dashboard](https://dashboard.clerk.com/) and create a new application
+2. Add a webhook for `user.created` and `user.updated` events with the URL `http://localhost:3000/api/auth/webhook`
+3. Copy your API keys to the `.env.local` file
+
+### 3. Configure Supabase
+
+1. Log in to [Supabase](https://supabase.com/) and create a new project
+2. In the SQL editor, create a users table with columns such as `id`, `clerk_user_id`, `email`, and other relevant fields
+3. Add triggers and policies for updating timestamps and managing data securely
+4. Copy your project URL and service role key to the `.env.local` file
+
+### 4. Configure OpenAI
+
+1. Sign up for an [OpenAI account](https://platform.openai.com/)
+2. Generate an API key from your OpenAI dashboard
+3. Copy your API key to the `.env.local` file as `OPENAI_API_KEY`
+
+### 5. Set Up Webhook Testing with Ngrok
+
+Start your local server:
+
+```bash
+npm run dev
+```
+
+In a separate terminal, run Ngrok:
+
+```bash
+ngrok http 3000
+```
+
+Update your Clerk webhook URL with the public URL provided by Ngrok.
+
+### 6. Start the Application
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser to see the app in action.
+
+## Testing the Setup
+
+1. Use the sign-up page to register a new user
+2. Confirm the user is created in Clerk and synced to Supabase via webhooks
+3. Verify webhook events in Ngrok's dashboard at [http://localhost:4040](http://localhost:4040)
+4. Test the dashboard features and subscription flows
+
+## Going to Production
+
+When you're ready to deploy your SaaS application to production, follow these steps:
+
+### Set up production webhooks
+
+1. Go to the Clerk Dashboard and update your webhook URL to your production domain
+2. Configure Stripe webhooks for your production environment
+3. Update webhook secrets in your production environment variables
+
+### Deploy to Vercel
+
+1. Push your code to a GitHub repository
+2. Connect your repository to [Vercel](https://vercel.com/) and deploy it
+3. Follow the Vercel deployment process
+
+### Add environment variables
+
+In your Vercel project settings, add all the necessary environment variables for production:
+
+1. `NEXT_PUBLIC_CLERK_FRONTEND_API`: Your production Clerk frontend API key
+2. `CLERK_API_KEY`: Your production Clerk backend API key  
+3. `CLERK_WEBHOOK_SECRET`: Your production Clerk webhook secret
+4. `NEXT_PUBLIC_SUPABASE_URL`: Your production Supabase project URL
+5. `SUPABASE_SERVICE_ROLE_KEY`: Your production Supabase service role key
+6. `OPENAI_API_KEY`: Your production OpenAI API key
+
+## Other Tips
+
+- Set your brand colors in `tailwind.config.ts`
+- Add your logo in `public/` directory and update references
+- Update your app PRD in [`docs/product-requirements-doc.md`](docs/product-requirements-doc.md)
+- Review database design in [`docs/db-design.md`](docs/db-design.md)
+- Customize the landing page components in `src/components/landing/`

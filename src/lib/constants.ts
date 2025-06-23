@@ -99,7 +99,7 @@ export const TESTIMONIALS: Testimonial[] = [
     {
         name: "Jill",
         role: "Staff Software Engineer",
-        message: "Saves me hours of time setting up my SaaS. Works great with Cursor to get my product to market.",
+        message: "Saves me hours of time setting up my SaaS. Works great with Cursor.",
         imageUrl: "https://images.unsplash.com/photo-1701615004837-40d8573b6652?q=80&w=1760&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
     },
     {
