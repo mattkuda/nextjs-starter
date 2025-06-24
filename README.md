@@ -26,6 +26,24 @@ This is a starter template for building a SaaS application using **Next.js** wit
 - **Styling**: [Tailwind CSS](https://tailwindcss.com/)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
 
+## Prerequisites
+
+Before you begin, ensure you have the following installed and set up:
+
+### Required Software
+- **Node.js** (v18 or higher): Download from [nodejs.org](https://nodejs.org/)
+- **Git**: Download from [git-scm.com](https://git-scm.com/)
+- **Code Editor**: We recommend [VS Code](https://code.visualstudio.com/) with the following extensions:
+  - TypeScript and JavaScript Language Features
+  - Tailwind CSS IntelliSense
+  - ES7+ React/Redux/React-Native snippets
+
+### Required Accounts
+- **Clerk**: Sign up at [clerk.com](https://clerk.com/) (for authentication)
+- **Supabase**: Sign up at [supabase.com](https://supabase.com/) (for database)
+- **OpenAI**: Sign up at [platform.openai.com](https://platform.openai.com/) (for AI features)
+- **Stripe**: Sign up at [stripe.com](https://stripe.com/) (for payments)
+
 ## Getting Started
 
 ```bash
