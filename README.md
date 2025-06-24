@@ -47,7 +47,7 @@ Before you begin, ensure you have the following installed and set up:
 ## Getting Started
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/mattkuda/nextjs-starter.git
 cd nextjs-starter
 npm install
 ```
