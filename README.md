@@ -33,6 +33,11 @@ Before you begin, ensure you have the following installed and set up:
 ### Required Software
 - **Node.js** (v18 or higher): Download from [nodejs.org](https://nodejs.org/)
 - **Git**: Download from [git-scm.com](https://git-scm.com/)
+- **Ngrok**: For local webhook testing
+  - **macOS**: `brew install ngrok/ngrok/ngrok` or download from [ngrok.com](https://ngrok.com/download)
+  - **Windows**: Download from [ngrok.com](https://ngrok.com/download) and add to PATH
+  - **Linux**: `sudo snap install ngrok` or download from [ngrok.com](https://ngrok.com/download)
+  - After installation, sign up for a free account at [ngrok.com](https://ngrok.com/) and run `ngrok config add-authtoken <your-authtoken>`
 - **Code Editor**: We recommend [VS Code](https://code.visualstudio.com/) with the following extensions:
   - TypeScript and JavaScript Language Features
   - Tailwind CSS IntelliSense
@@ -89,19 +94,40 @@ NGROK_URL=your_ngrok_public_url
 
 ### 5. Set Up Webhook Testing with Ngrok
 
+First, make sure you have ngrok installed and authenticated (see Prerequisites section above).
+
 Start your local server:
 
 ```bash
 npm run dev
 ```
 
-In a separate terminal, run Ngrok:
+In a separate terminal window, start ngrok to create a public tunnel to your local server:
 
 ```bash
 ngrok http 3000
 ```
 
-Update your Clerk webhook URL with the public URL provided by Ngrok.
+Ngrok will display output similar to this:
+```
+Session Status                online
+Account                       your-email@example.com
+Version                       3.x.x
+Region                        United States (us)
+Latency                       -
+Web Interface                 http://127.0.0.1:4040
+Forwarding                    https://abc123def456.ngrok-free.app -> http://localhost:3000
+```
+
+Copy the `https://abc123def456.ngrok-free.app` URL (your URL will be different).
+
+Now update your Clerk webhook URL:
+1. Go to your Clerk Dashboard
+2. Navigate to Webhooks
+3. Update your webhook endpoint URL to: `https://your-ngrok-url.ngrok-free.app/api/auth/webhook`
+4. Save the changes
+
+> **Important**: Keep the ngrok terminal window open while testing. If you restart ngrok, you'll get a new URL and need to update your Clerk webhook again.
 
 ### 6. Start the Application
 
