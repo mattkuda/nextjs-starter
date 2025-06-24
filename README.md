@@ -49,7 +49,7 @@ Before you begin, ensure you have the following installed and set up:
 ```bash
 git clone https://github.com/mattkuda/nextjs-starter.git
 cd nextjs-starter
-npm install
+npm install -f
 ```
 
 ## Running Locally
