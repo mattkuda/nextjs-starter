@@ -73,28 +73,9 @@ OPENAI_API_KEY=your_openai_api_key
 NGROK_URL=your_ngrok_public_url
 ```
 
-### 2. Configure Clerk
+### 2. Set Up Ngrok for Webhook Testing
 
-1. Go to your [Clerk Dashboard](https://dashboard.clerk.com/) and create a new application
-2. Add a webhook for `user.created` and `user.updated` events with the URL `http://localhost:3000/api/auth/webhook`
-3. Copy your API keys to the `.env.local` file
-
-### 3. Configure Supabase
-
-1. Log in to [Supabase](https://supabase.com/) and create a new project
-2. In the SQL editor, create a users table with columns such as `id`, `clerk_user_id`, `email`, and other relevant fields
-3. Add triggers and policies for updating timestamps and managing data securely
-4. Copy your project URL and service role key to the `.env.local` file
-
-### 4. Configure OpenAI
-
-1. Sign up for an [OpenAI account](https://platform.openai.com/)
-2. Generate an API key from your OpenAI dashboard
-3. Copy your API key to the `.env.local` file as `OPENAI_API_KEY`
-
-### 5. Set Up Webhook Testing with Ngrok
-
-First, make sure you have ngrok installed and authenticated (see Prerequisites section above).
+First, make sure you have [ngrok](https://ngrok.com/download) installed and authenticated (see Prerequisites section above).
 
 Start your local server:
 
@@ -119,15 +100,51 @@ Web Interface                 http://127.0.0.1:4040
 Forwarding                    https://abc123def456.ngrok-free.app -> http://localhost:3000
 ```
 
-Copy the `https://abc123def456.ngrok-free.app` URL (your URL will be different).
+Copy the `https://abc123def456.ngrok-free.app` URL (your URL will be different). You'll need this URL for configuring webhooks in the next steps.
 
-Now update your Clerk webhook URL:
-1. Go to your Clerk Dashboard
-2. Navigate to Webhooks
-3. Update your webhook endpoint URL to: `https://your-ngrok-url.ngrok-free.app/api/auth/webhook`
-4. Save the changes
+> **Important**: Keep the ngrok terminal window open while testing. If you restart ngrok, you'll get a new URL and need to update your webhook configurations again.
 
-> **Important**: Keep the ngrok terminal window open while testing. If you restart ngrok, you'll get a new URL and need to update your Clerk webhook again.
+### 3. Configure Clerk
+
+1. Go to your [Clerk Dashboard](https://dashboard.clerk.com/) and create a new application by clicking the **"+ Add application"** button
+2. Choose your application name and click **"Create application"**
+3. In the **Overview** section, you'll see the API keys you need:
+   - Copy `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY` and paste it into your `.env.local` file
+   - Copy `CLERK_SECRET_KEY` and paste it into your `.env.local` file
+4. Next, go to the **Configure** tab in the left sidebar
+5. Click **"Webhooks"** in the left sidebar, then click the **"+ Add Endpoint"** button
+6. For the endpoint URL, paste in your ngrok URL followed by `/api/auth/webhook`. For example: `https://abc123def456.ngrok-free.app/api/auth/webhook`
+7. In the **"Events"** section, select the checkbox for these events:
+   - `user.created`
+   - `user.updated` 
+   - `user.deleted`
+8. Click **"Create"** to save the webhook
+9. Copy the **"Signing Secret"** value and paste it into your `.env.local` file as `CLERK_WEBHOOK_SECRET`
+
+### 4. Configure Supabase
+
+1. Go to [Supabase](https://supabase.com/) and click **"Start your project"** or **"Sign In"** if you already have an account
+2. Once logged in, click **"+ New project"** 
+3. Choose your organization, enter a project name, database password, and select a region
+4. Click **"Create new project"** and wait for the project to be set up (this may take a few minutes)
+5. Once ready, go to **Settings** in the left sidebar, then click **"API"**
+6. Copy the following values to your `.env.local` file:
+   - Copy the **"Project URL"** and paste it as `NEXT_PUBLIC_SUPABASE_URL`
+   - Copy the **"service_role secret"** key and paste it as `SUPABASE_SERVICE_ROLE_KEY`
+7. Go to the **SQL Editor** in the left sidebar and click **"+ New query"**
+8. Copy the commands from [`docs/db-design.md`](docs/db-design.md) and paste them into the query editor
+9. Click **"Run"** to execute the query
+
+### 5. Configure OpenAI
+
+1. Go to [OpenAI Platform](https://platform.openai.com/) and click **"Sign up"** or **"Log in"** if you already have an account
+2. Once logged in, click on your profile icon in the top-right corner and select **"Your profile"** 
+3. In the left sidebar, click **"User API keys"** 
+4. Click **"+ Create new secret key"**
+5. Give your key a name (e.g., "NextJS SaaS App") and click **"Create secret key"**
+6. **Important**: Copy the API key immediately and paste it into your `.env.local` file as `OPENAI_API_KEY`
+   - You won't be able to see this key again, so make sure to save it now
+7. Make sure you have billing set up by going to **"Billing"** in the left sidebar and adding a payment method
 
 ### 6. Start the Application
 
