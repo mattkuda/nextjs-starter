@@ -1,14 +1,3 @@
--- MIGRATION COMMANDS (run these if you have existing tables):
--- For subscriptions table:
--- alter table subscriptions add column tier text check (tier in ('starter', 'pro', 'max'));
--- alter table subscriptions add column billing_cycle text check (billing_cycle in ('monthly', 'yearly'));
--- update subscriptions set tier = 'starter', billing_cycle = 'monthly' where tier is null; -- Set defaults for existing records
--- alter table subscriptions alter column tier set not null;
--- alter table subscriptions alter column billing_cycle set not null;
-
--- For users table (add additional_context field):
--- alter table users add column additional_context text;
-
 -- FRESH SETUP (use this for new installations):
 
 -- Users authenticated via Clerk

@@ -69,6 +69,9 @@ CLERK_API_KEY=your_clerk_backend_api_key
 CLERK_WEBHOOK_SECRET=your_clerk_webhook_secret
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
+STRIPE_SECRET_KEY=your_stripe_secret_key
+STRIPE_WEBHOOK_SECRET=your_stripe_webhook_secret
 OPENAI_API_KEY=your_openai_api_key
 NGROK_URL=your_ngrok_public_url
 ```
@@ -127,15 +130,44 @@ Copy the `https://abc123def456.ngrok-free.app` URL (your URL will be different).
 2. Once logged in, click **"+ New project"** 
 3. Choose your organization, enter a project name, database password, and select a region
 4. Click **"Create new project"** and wait for the project to be set up (this may take a few minutes)
-5. Once ready, go to **Settings** in the left sidebar, then click **"API"**
-6. Copy the following values to your `.env.local` file:
-   - Copy the **"Project URL"** and paste it as `NEXT_PUBLIC_SUPABASE_URL`
+5. Once ready, go to **Project Settings** in the left sidebar, then click **"Data API"**
+   - Copy the **"URL"** and paste it as `NEXT_PUBLIC_SUPABASE_URL` in your `.env.local` file.
+6. Then go to **Project Settings** > **API Keys** > **Service Role**
    - Copy the **"service_role secret"** key and paste it as `SUPABASE_SERVICE_ROLE_KEY`
 7. Go to the **SQL Editor** in the left sidebar and click **"+ New query"**
 8. Copy the commands from [`docs/db-design.md`](docs/db-design.md) and paste them into the query editor
 9. Click **"Run"** to execute the query
 
-### 5. Configure OpenAI
+### 5. Configure Stripe
+
+1. Go to [Stripe](https://stripe.com/) and click **"Sign up"** or **"Sign in"** if you already have an account
+2. Once logged in, make sure you're in **Test mode** (toggle in the top-left should show "Test mode")
+3. In the left sidebar, click **"Products"** then click **"+ Add product"**
+4. Fill out the product details:
+   - **Name**: "Pro Plan"
+   - **Description**: "Monthly pro subscription"
+   - **Pricing model**: Select **"Recurring"**
+   - **Price**: Enter your price (e.g., "$29.00")
+   - **Billing period**: Select **"Monthly"**
+5. Click **"Save product"**
+6. Copy the **Price ID** that appears (starts with `price_`) - you'll need this for your app
+7. Go to **"Developers"** in the left sidebar, then click **"API keys"**
+8. Copy the following keys to your `.env.local` file:
+   - Copy **"Publishable key"** and paste it as `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+   - Copy **"Secret key"** and paste it as `STRIPE_SECRET_KEY`
+9. Click **"Webhooks"** in the left sidebar, then click **"+ Add endpoint"**
+10. For the endpoint URL, paste in your ngrok URL followed by `/api/payments/webhook`. For example: `https://abc123def456.ngrok-free.app/api/payments/webhook`
+11. Click **"Select events"** and choose these events:
+    - `customer.subscription.created`
+    - `customer.subscription.updated`
+    - `customer.subscription.deleted`
+    - `invoice.payment_succeeded`
+    - `invoice.payment_failed`
+12. Click **"Add events"** then **"Add endpoint"**
+13. Click on the newly created webhook endpoint and copy the **"Signing secret"**
+14. Paste the signing secret into your `.env.local` file as `STRIPE_WEBHOOK_SECRET`
+
+### 6. Configure OpenAI
 
 1. Go to [OpenAI Platform](https://platform.openai.com/) and click **"Sign up"** or **"Log in"** if you already have an account
 2. Once logged in, click on your profile icon in the top-right corner and select **"Your profile"** 
@@ -146,7 +178,7 @@ Copy the `https://abc123def456.ngrok-free.app` URL (your URL will be different).
    - You won't be able to see this key again, so make sure to save it now
 7. Make sure you have billing set up by going to **"Billing"** in the left sidebar and adding a payment method
 
-### 6. Start the Application
+### 7. Start the Application
 
 ```bash
 npm run dev
@@ -167,8 +199,8 @@ When you're ready to deploy your SaaS application to production, follow these st
 
 ### Set up production webhooks
 
-1. Go to the Clerk Dashboard and update your webhook URL to your production domain
-2. Configure Stripe webhooks for your production environment
+1. Go to the Clerk Dashboard and update your webhook URL to your production domain (e.g., `https://yourdomain.com/api/auth/webhook`)
+2. Go to the Stripe Dashboard and update your webhook URL to your production domain (e.g., `https://yourdomain.com/api/payments/webhook`)
 3. Update webhook secrets in your production environment variables
 
 ### Deploy to Vercel
@@ -186,7 +218,10 @@ In your Vercel project settings, add all the necessary environment variables for
 3. `CLERK_WEBHOOK_SECRET`: Your production Clerk webhook secret
 4. `NEXT_PUBLIC_SUPABASE_URL`: Your production Supabase project URL
 5. `SUPABASE_SERVICE_ROLE_KEY`: Your production Supabase service role key
-6. `OPENAI_API_KEY`: Your production OpenAI API key
+6. `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`: Your production Stripe publishable key
+7. `STRIPE_SECRET_KEY`: Your production Stripe secret key
+8. `STRIPE_WEBHOOK_SECRET`: Your production Stripe webhook secret
+9. `OPENAI_API_KEY`: Your production OpenAI API key
 
 ## Other Tips
 
