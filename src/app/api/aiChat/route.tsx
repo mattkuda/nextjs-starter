@@ -51,7 +51,6 @@ async function getCurrentCreditsUsage(userId: string, subscriptionStatus: Subscr
     const { CREDITS_LIMITS } = await import('@/lib/constants');
     const maxCredits = CREDITS_LIMITS[subscriptionStatus] || 0;
 
-    console.log('getCurrentCreditsUsage', userId, subscriptionStatus, maxCredits);
 
     if (subscriptionStatus === SubscriptionStatus.FREE) {
         // For free users, check total usage from credit_usage_log
@@ -106,7 +105,6 @@ export async function POST(req: Request) {
         const creditsInfo = await getCurrentCreditsUsage(user.id, subscriptionStatus);
 
         if (creditsInfo.remaining <= 0) {
-            console.log('Insufficient credits. Upgrade your plan to continue.');
             return NextResponse.json({ error: 'Insufficient credits. Upgrade your plan to continue.' }, { status: 403 });
         }
 

@@ -90,7 +90,7 @@ export function PricingCards({ isWaitlistMode = false }: PricingCardsProps) {
                     return (
                         <Card
                             key={plan.id}
-                            className={`relative ${plan.isPopular ? 'border-2 border-primary shadow-lg' : ''
+                            className={`relative flex flex-col ${plan.isPopular ? 'border-2 border-primary shadow-lg' : ''
                                 }`}
                         >
                             {plan.isPopular && (
@@ -116,7 +116,7 @@ export function PricingCards({ isWaitlistMode = false }: PricingCardsProps) {
                                 </div>
                                 <CardDescription>{plan.description}</CardDescription>
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="flex-grow">
                                 <ul className="space-y-3">
                                     {isYearly && (
                                         <li className="flex items-center">
@@ -136,7 +136,7 @@ export function PricingCards({ isWaitlistMode = false }: PricingCardsProps) {
                             </CardContent>
                             <CardFooter>
                                 <Button
-                                    className={`w-full ${plan.isPopular
+                                    className={`w-full h-12 text-base ${plan.isPopular
                                         ? 'bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white'
                                         : 'bg-primary hover:bg-primary/90 text-white'
                                         }`}

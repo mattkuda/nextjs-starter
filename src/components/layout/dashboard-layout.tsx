@@ -125,7 +125,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             if (isRecentUser) {
                 // For recent users, do an additional subscription status check
                 // with retry logic to handle webhook processing delays
-                console.log('Recent user with FREE status, performing additional verification...');
 
                 const verifySubscription = async () => {
                     try {
@@ -134,7 +133,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
                         if (subscription_status !== SubscriptionStatus.FREE) {
                             // Subscription found! Refetch user data to update UI
-                            console.log('Subscription verified, refreshing user data...');
                             await refetch();
                             return;
                         }

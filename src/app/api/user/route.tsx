@@ -42,7 +42,6 @@ async function determineSubscriptionStatus(user: { id: string; stripe_subscripti
             // If this is the first attempt and we're checking soon after signup,
             // wait a bit and retry to allow webhook processing time
             if (retryCount === 0) {
-                console.log(`No subscription found for user ${user.id}, retrying after delay...`);
                 await new Promise(resolve => setTimeout(resolve, 2000)); // Wait 2 seconds
                 return determineSubscriptionStatus(user, retryCount + 1);
             }
@@ -70,7 +69,6 @@ async function determineSubscriptionStatus(user: { id: string; stripe_subscripti
 
         // If this is a Stripe API error and we haven't retried yet, try once more
         if (retryCount === 0 && error instanceof Error && error.message.includes('No such subscription')) {
-            console.log(`Stripe subscription not found, retrying after delay...`);
             await new Promise(resolve => setTimeout(resolve, 2000));
             return determineSubscriptionStatus(user, retryCount + 1);
         }

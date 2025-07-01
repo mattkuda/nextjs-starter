@@ -8,7 +8,6 @@ const supabase = createClient(
 );
 
 export async function POST(req: Request) {
-    console.log("Webhook received");
     const WEBHOOK_SECRET = process.env.CLERK_WEBHOOK_SECRET;
 
     if (!WEBHOOK_SECRET) {
@@ -88,7 +87,6 @@ async function handleUserCreated(data: {
     first_name?: string;
     last_name?: string;
 }) {
-    console.log("User created", data);
     const { id, email_addresses, first_name, last_name } = data;
     const email = email_addresses?.[0]?.email_address;
 

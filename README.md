@@ -149,13 +149,15 @@ Copy the `https://abc123def456.ngrok-free.app` URL (your URL will be different).
    - **Pricing model**: Select **"Recurring"**
    - **Price**: Enter your price (e.g., "$29.00")
    - **Billing period**: Select **"Monthly"**
-5. Click **"Save product"**
-6. Copy the **Price ID** that appears (starts with `price_`) - you'll need this for your app
-7. Go to **"Developers"** in the left sidebar, then click **"API keys"**
-8. Copy the following keys to your `.env.local` file:
-   - Copy **"Publishable key"** and paste it as `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
+5. Click **"Add product"**
+6. Once created, click on the product to view its details, then click its price to view its details.
+7. Copy the **Price ID** that appears in the top right (starts with `price_`) - you'll need this for your app
+  - Paste this ID as `STRIPE_PRO_MONTHLY_PRICE_ID` in your `.env.local` file
+8. Repeat steps 5-7 for this process for the other price IDs and paste them in your `.env.local` file as well:
+9. Click **"Developers"** in the left bottom left to open the workbench, 
+10. In the API Keys section, copy the following keys to your `.env.local` file:
    - Copy **"Secret key"** and paste it as `STRIPE_SECRET_KEY`
-9. Click **"Webhooks"** in the left sidebar, then click **"+ Add endpoint"**
+9. In the workbaench, click **"Webhooks"**, then click **"+ Add endpoint"**
 10. For the endpoint URL, paste in your ngrok URL followed by `/api/payments/webhook`. For example: `https://abc123def456.ngrok-free.app/api/payments/webhook`
 11. Click **"Select events"** and choose these events:
     - `customer.subscription.created`
@@ -164,15 +166,13 @@ Copy the `https://abc123def456.ngrok-free.app` URL (your URL will be different).
     - `invoice.payment_succeeded`
     - `invoice.payment_failed`
 12. Click **"Add events"** then **"Add endpoint"**
-13. Click on the newly created webhook endpoint and copy the **"Signing secret"**
+13. Click on the newly created webhook endpoint and copy the **"Signing secret"**, starting with `whsec_`
 14. Paste the signing secret into your `.env.local` file as `STRIPE_WEBHOOK_SECRET`
 
 ### 6. Configure OpenAI
 
 1. Go to [OpenAI Platform](https://platform.openai.com/) and click **"Sign up"** or **"Log in"** if you already have an account
-2. Once logged in, click on your profile icon in the top-right corner and select **"Your profile"** 
-3. In the left sidebar, click **"User API keys"** 
-4. Click **"+ Create new secret key"**
+2. Once logged in, navigate to [**"API Keys"**](https://platform.openai.com/api-keys) in the left sidebar and click **"Create new secret key"**
 5. Give your key a name (e.g., "NextJS SaaS App") and click **"Create secret key"**
 6. **Important**: Copy the API key immediately and paste it into your `.env.local` file as `OPENAI_API_KEY`
    - You won't be able to see this key again, so make sure to save it now

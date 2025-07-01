@@ -84,7 +84,6 @@ export async function deductCredits(
   creditsToDeduct: number = 1
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    console.log('deductCredits', userId, subscriptionStatus, featureId, creditsToDeduct);
     // Import server-side dependencies
     const { createClient } = await import('@supabase/supabase-js');
     const { SubscriptionStatus } = await import('./constants');

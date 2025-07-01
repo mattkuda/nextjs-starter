@@ -89,7 +89,7 @@ export function SimplePricingCards({ isWaitlistMode = false }: SimplePricingCard
                     return (
                         <div
                             key={plan.id}
-                            className={`bg-background rounded-lg p-6 border ${plan.isPopular ? 'border-2 border-primary relative shadow-lg' : 'border-muted'
+                            className={`bg-background rounded-lg p-6 border flex flex-col ${plan.isPopular ? 'border-2 border-primary relative shadow-lg' : 'border-muted'
                                 }`}
                         >
                             {plan.isPopular && (
@@ -112,35 +112,37 @@ export function SimplePricingCards({ isWaitlistMode = false }: SimplePricingCard
                                     </div>
                                 )}
                             </div>
-                            <p className="text-muted-foreground mb-4 text-sm">
+                            <p className="text-muted-foreground mb-6 text-sm">
                                 {plan.description}
                             </p>
+                            <div className="flex-grow">
+                                <ul className="space-y-2">
+                                    {isYearly && (
+                                        <li className="flex items-center text-sm">
+                                            <CheckIcon className="h-4 w-4 text-primary mr-2" />
+                                            <span className="font-medium text-primary">
+                                                Save ${getSavingsAmount(plan.monthlyPrice).toFixed(2)}
+                                            </span>
+                                        </li>
+                                    )}
+                                    {plan.features.slice(0, 4).map((feature, index) => (
+                                        <li key={index} className="flex items-center text-sm">
+                                            <CheckIcon className="h-4 w-4 text-primary mr-2" />
+                                            <span>{feature}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
                             <Button
-                                className={`w-full mb-4 ${plan.isPopular
-                                        ? 'bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white'
-                                        : 'bg-primary hover:bg-primary/90 text-white'
+                                className={`w-full h-12 text-base mt-6 ${plan.isPopular
+                                    ? 'bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white'
+                                    : 'bg-primary hover:bg-primary/90 text-white'
                                     }`}
                                 onClick={isWaitlistMode ? scrollToEmail : () => handleSubscribe(plan.id)}
                             >
                                 {isWaitlistMode ? 'Join Waitlist' : `Get ${plan.name}`}
                                 <ArrowRightIcon className="ml-2 h-4 w-4" />
                             </Button>
-                            <ul className="space-y-2">
-                                {isYearly && (
-                                    <li className="flex items-center text-sm">
-                                        <CheckIcon className="h-4 w-4 text-primary mr-2" />
-                                        <span className="font-medium text-primary">
-                                            Save ${getSavingsAmount(plan.monthlyPrice).toFixed(2)}
-                                        </span>
-                                    </li>
-                                )}
-                                {plan.features.slice(0, 4).map((feature, index) => (
-                                    <li key={index} className="flex items-center text-sm">
-                                        <CheckIcon className="h-4 w-4 text-primary mr-2" />
-                                        <span>{feature}</span>
-                                    </li>
-                                ))}
-                            </ul>
                         </div>
                     )
                 })}

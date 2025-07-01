@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { auth, clerkClient } from '@clerk/nextjs/server';
 import { createClient } from "@supabase/supabase-js";
 import Stripe from 'stripe';
@@ -14,7 +14,7 @@ const supabase = createClient(
     process.env.SUPABASE_SERVICE_KEY!
 );
 
-export async function POST(req: NextRequest) {
+export async function POST() {
     try {
         const { userId } = await auth();
         if (!userId) {
@@ -23,8 +23,6 @@ export async function POST(req: NextRequest) {
                 { status: 401 }
             );
         }
-
-        console.log(`Starting account deletion for user: ${userId}`);
 
         // Get user data from database
         const { data: user, error: userError } = await supabase
@@ -44,18 +42,14 @@ export async function POST(req: NextRequest) {
         // Cancel any active subscriptions
         if (user.stripe_subscription_id) {
             try {
-                console.log(`Canceling subscription: ${user.stripe_subscription_id}`);
                 await stripe.subscriptions.cancel(user.stripe_subscription_id);
-                console.log('Subscription canceled successfully');
             } catch (stripeError) {
                 console.error('Error canceling subscription:', stripeError);
                 // Continue with deletion even if subscription cancellation fails
             }
         }
 
-        // Delete user data from database (this will cascade to related tables due to foreign key constraints)
-        console.log('Deleting user data from database...');
-        
+
         // Delete credit usage logs
         const { error: creditLogError } = await supabase
             .from('credit_usage_log')
@@ -102,16 +96,13 @@ export async function POST(req: NextRequest) {
 
         // Delete user from Clerk
         try {
-            console.log('Deleting user from Clerk...');
             const client = await clerkClient();
             await client.users.deleteUser(userId);
-            console.log('User deleted from Clerk successfully');
         } catch (clerkError) {
             console.error('Error deleting user from Clerk:', clerkError);
             // User data is already deleted from our database, so this is not critical
         }
 
-        console.log(`Account deletion completed for user: ${userId}`);
 
         return NextResponse.json({
             message: 'Account deleted successfully',

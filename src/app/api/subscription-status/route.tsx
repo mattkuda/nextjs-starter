@@ -55,7 +55,6 @@ async function checkSubscriptionStatusWithRetry(userId: string, maxRetries = 3):
             if (!stripeSubscriptionId) {
                 // If this is not the last attempt, wait and retry
                 if (attempt < maxRetries - 1) {
-                    console.log(`No subscription found for user ${userId}, attempt ${attempt + 1}/${maxRetries}, retrying...`);
                     await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1))); // Exponential backoff
                     continue;
                 }
@@ -81,13 +80,13 @@ async function checkSubscriptionStatusWithRetry(userId: string, maxRetries = 3):
 
         } catch (error) {
             console.error(`Error checking subscription status (attempt ${attempt + 1}):`, error);
-            
+
             // If this is not the last attempt, wait and retry
             if (attempt < maxRetries - 1) {
                 await new Promise(resolve => setTimeout(resolve, 2000 * (attempt + 1)));
                 continue;
             }
-            
+
             return SubscriptionStatus.FREE;
         }
     }
@@ -104,14 +103,14 @@ export async function GET() {
 
         const subscriptionStatus = await checkSubscriptionStatusWithRetry(userId);
 
-        return NextResponse.json({ 
+        return NextResponse.json({
             subscription_status: subscriptionStatus,
             timestamp: new Date().toISOString()
         });
     } catch (error) {
         console.error("Error in subscription status check:", error);
         return NextResponse.json(
-            { 
+            {
                 subscription_status: SubscriptionStatus.FREE,
                 error: "Failed to check subscription status",
                 timestamp: new Date().toISOString()

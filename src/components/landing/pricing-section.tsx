@@ -221,7 +221,7 @@ export function PricingSection({
                             return (
                                 <CardComponent
                                     key={plan.id}
-                                    className={`bg-background rounded-lg p-8 relative ${cardBorderClass}`}
+                                    className={`bg-background rounded-lg p-8 relative flex flex-col ${cardBorderClass}`}
                                     {...cardProps}
                                 >
                                     {planStatus === 'current' && (
@@ -262,8 +262,26 @@ export function PricingSection({
                                     <p className="text-muted-foreground mb-6">
                                         {plan.description}
                                     </p>
+                                    <div className="flex-grow">
+                                        <ul className="space-y-3">
+                                            {isYearly && (
+                                                <li className="flex items-center">
+                                                    <CheckIcon className="h-4 w-4 text-primary mr-3" />
+                                                    <span className="text-sm font-medium text-primary">
+                                                        Save ${getSavingsAmount(plan.monthlyPrice).toFixed(2)}
+                                                    </span>
+                                                </li>
+                                            )}
+                                            {plan.features.map((feature, featureIndex) => (
+                                                <li key={featureIndex} className="flex items-center">
+                                                    <CheckIcon className="h-4 w-4 text-primary mr-3" />
+                                                    <span className="text-sm">{feature}</span>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
                                     <Button
-                                        className={`w-full mb-6 ${planStatus === 'current'
+                                        className={`w-full h-12 text-base mt-6 ${planStatus === 'current'
                                             ? 'bg-muted hover:bg-muted text-muted-foreground cursor-not-allowed'
                                             : isRecommendedUpgrade
                                                 ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg'
@@ -286,22 +304,6 @@ export function PricingSection({
                                         {buttonConfig.text}
                                         {!buttonConfig.disabled && <ArrowRightIcon className="ml-2 h-4 w-4" />}
                                     </Button>
-                                    <ul className="space-y-3">
-                                        {isYearly && (
-                                            <li className="flex items-center">
-                                                <CheckIcon className="h-4 w-4 text-primary mr-3" />
-                                                <span className="text-sm font-medium text-primary">
-                                                    Save ${getSavingsAmount(plan.monthlyPrice).toFixed(2)}
-                                                </span>
-                                            </li>
-                                        )}
-                                        {plan.features.map((feature, featureIndex) => (
-                                            <li key={featureIndex} className="flex items-center">
-                                                <CheckIcon className="h-4 w-4 text-primary mr-3" />
-                                                <span className="text-sm">{feature}</span>
-                                            </li>
-                                        ))}
-                                    </ul>
                                 </CardComponent>
                             )
                         })}

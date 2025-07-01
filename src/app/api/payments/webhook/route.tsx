@@ -14,8 +14,6 @@ const supabase = createClient(
 );
 
 export async function POST(req: NextRequest) {
-    console.log("Webhook received");
-    console.log(req);
     const reqText = await req.text();
     return webhooksHandler(reqText, req);
 }
@@ -24,7 +22,6 @@ async function handleSubscriptionEvent(
     event: Stripe.Event,
     type: "created" | "updated" | "deleted"
 ) {
-    console.log(`Processing subscription ${type} event:`, event.id);
     const subscription = event.data.object as Stripe.Subscription;
     const customerId = subscription.customer as string;
 
@@ -41,7 +38,6 @@ async function handleSubscriptionEvent(
             });
         }
 
-        console.log(`Processing subscription ${type} for user email:`, userEmail);
 
         // Get the user from our database with retry logic for new users
         let user;
@@ -60,7 +56,6 @@ async function handleSubscriptionEvent(
             userError = result.error;
 
             if (userError && retryCount < maxRetries) {
-                console.log(`User not found, retry ${retryCount + 1}/${maxRetries} for email:`, userEmail);
                 await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1))); // Exponential backoff
                 retryCount++;
             }
@@ -74,11 +69,9 @@ async function handleSubscriptionEvent(
             });
         }
 
-        console.log(`Found user ${user.id} for subscription ${type}`);
 
         // Store plan info from Stripe metadata or price ID for reference
         const priceId = subscription.items.data[0].price.id;
-        console.log("Processing subscription for price ID:", priceId);
 
         // Get tier and billing cycle from price ID
         const planInfo = getPlanFromPriceId(priceId);
@@ -101,7 +94,7 @@ async function handleSubscriptionEvent(
                     billing_cycle: planInfo.billing_cycle,
                     start_date: new Date(subscription.current_period_start * 1000).toISOString().split('T')[0],
                     end_date: new Date(subscription.current_period_end * 1000).toISOString().split('T')[0],
-                    is_active: ['active', 'trialing'].includes(subscription.status), // Include trialing status
+                    is_active: true,
                     cancel_at_period_end: subscription.cancel_at_period_end,
                 }, {
                     onConflict: 'stripe_subscription_id'
@@ -125,34 +118,7 @@ async function handleSubscriptionEvent(
                 });
             }
 
-            // Initialize credit usage window for new subscriptions
-            if (type === "created" && subData) {
-                const startDate = new Date(subscription.current_period_start * 1000);
-                const endDate = new Date(subscription.current_period_end * 1000);
 
-                // Ensure end date is after start date to satisfy database constraint
-                if (endDate <= startDate) {
-                    endDate.setDate(startDate.getDate() + 1);
-                }
-
-                const { error: creditError } = await supabase
-                    .from("credit_usage")
-                    .insert({
-                        user_id: user.id,
-                        subscription_id: subData.id, // Use the database subscription ID, not Stripe ID
-                        usage_window_start: startDate.toISOString().split('T')[0],
-                        usage_window_end: endDate.toISOString().split('T')[0],
-                        credits_used: 0,
-                    });
-
-                if (creditError) {
-                    console.error("Error initializing credit usage:", creditError);
-                    return NextResponse.json({
-                        status: 500,
-                        error: "Error initializing credit usage",
-                    });
-                }
-            }
         } else if (type === "deleted") {
             // Mark subscription as inactive and clear user's subscription ID
             const { error: subError } = await supabase
