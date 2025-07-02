@@ -225,7 +225,7 @@ In your Vercel project settings, add all the necessary environment variables for
 
 ## Other Tips
 
-- Set your brand colors in `tailwind.config.ts`
+- Set your brand colors as the `primary` and `secondary` colors in `tailwind.config.ts`
 - Add your logo in `public/` directory and update references
 - Update your app PRD in [`docs/product-requirements-doc.md`](docs/product-requirements-doc.md)
 - Review database design in [`docs/db-design.md`](docs/db-design.md)
