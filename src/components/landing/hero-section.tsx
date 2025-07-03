@@ -13,8 +13,8 @@ export function HeroSection() {
                 <div className="mx-auto max-w-7xl text-center">
                     <div className="opacity-0 animate-fade-in">
                         <h1 className="text-4xl font-bold tracking-tight text-foreground sm:text-6xl">
-                            Stop coding boilerplate.<br />
-                            Start <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">Selling Subscriptions</span>
+                            Stop coding boilerplate<br />
+                            Start <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">selling subscriptions</span>
                         </h1>
                         <p className="mx-auto mt-6 max-w-2xl text-lg text-muted-foreground">
                             The only Next.js starter you need. Auth, payments, database, and AI included. Launch your startup this weekend.
